@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Milli Kit | ミリプロ推し活ツール集</title>
+<meta name="description" content="Milli Kit（ミリキット）はミリプロファンのための推し活ツール集。第一弾 Milli Linker では推し・ファンネーム・神回を1枚の名刺にまとめ、Xで共有できます。">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Milli Kit">
+<meta property="og:title" content="Milli Kit | ミリプロ推し活ツール集">
+<meta property="og:description" content="推し活をもっと可愛く、もっと便利に。Milli Linkerで推しへの愛を1枚に。">
+<meta property="og:image" content="https://milli-kit.pages.dev/images/ogp-kit.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="images/icon/192.png" type="image/png" sizes="192x192">
+<link rel="icon" href="images/icon/512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="images/icon/apple-touch-icon.png" sizes="180x180">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700;800&family=M+PLUS+Rounded+1c:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="kit.css">
+<script>try{if(localStorage.getItem("milli-theme")==="dark"||(!localStorage.getItem("milli-theme")&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.dataset.theme="dark";}catch(e){}</script>
+</head>
+<body data-kit-theme="default">
+<div class="kit-bg-curves" aria-hidden="true">
+  <svg viewBox="0 0 1200 820" preserveAspectRatio="none" width="100%" height="100%">
+    <!-- 13 members —濃さは戻しつつ、場所ごとに太さを変え、重なりをずらしたパレット曲線 -->
+    <!-- konomi #5f97a4 --><path d="M -80 110 C 220 20, 580 240, 1280 90" fill="none" stroke="#5f97a4" stroke-width="1.95" stroke-linecap="round" opacity="0.16"/>
+    <!-- nono #6d609d --><path d="M -80 175 C 300 90, 680 320, 1280 170" fill="none" stroke="#6d609d" stroke-width="1.35" stroke-linecap="round" opacity="0.14"/>
+    <!-- akubi #5c1125 --><path d="M -80 235 C 340 160, 720 380, 1280 220" fill="none" stroke="#5c1125" stroke-width="1.65" stroke-linecap="round" opacity="0.13"/>
+    <!-- koma #d09559 --><path d="M -80 275 C 260 80, 600 360, 1280 250" fill="none" stroke="#d09559" stroke-width="1.30" stroke-linecap="round" opacity="0.14"/>
+    <!-- raco #cba60b --><path d="M -80 310 C 380 140, 740 460, 1280 300" fill="none" stroke="#cba60b" stroke-width="2.00" stroke-linecap="round" opacity="0.16"/>
+    <!-- yura #7f96bf --><path d="M -80 355 C 320 120, 700 500, 1280 340" fill="none" stroke="#7f96bf" stroke-width="1.75" stroke-linecap="round" opacity="0.16"/>
+    <!-- nuhu #c6989a --><path d="M -80 405 C 400 210, 780 540, 1280 380" fill="none" stroke="#c6989a" stroke-width="1.35" stroke-linecap="round" opacity="0.14"/>
+    <!-- tsukuri #a8a6ab --><path d="M -80 445 C 360 260, 760 580, 1280 430" fill="none" stroke="#a8a6ab" stroke-width="1.30" stroke-linecap="round" opacity="0.13"/>
+    <!-- liz #617a7a --><path d="M -80 485 C 440 280, 820 620, 1280 470" fill="none" stroke="#617a7a" stroke-width="1.85" stroke-linecap="round" opacity="0.14"/>
+    <!-- rei #7e97b1 --><path d="M -80 530 C 380 320, 780 660, 1280 510" fill="none" stroke="#7e97b1" stroke-width="1.55" stroke-linecap="round" opacity="0.15"/>
+    <!-- mahoro #EF454A --><path d="M -80 575 C 460 360, 860 700, 1280 560" fill="none" stroke="#EF454A" stroke-width="2.05" stroke-linecap="round" opacity="0.15"/>
+    <!-- aoi #7BC043 --><path d="M -80 630 C 500 440, 880 740, 1280 610" fill="none" stroke="#7BC043" stroke-width="1.35" stroke-linecap="round" opacity="0.14"/>
+    <!-- milchan #74a5ae --><path d="M -80 680 C 420 500, 840 780, 1280 660" fill="none" stroke="#74a5ae" stroke-width="1.60" stroke-linecap="round" opacity="0.14"/>
+    <!-- tech dash — パレットの筆触アクセント -->
+    <path d="M -80 200 C 280 40, 620 280, 1280 180" fill="none" stroke="#9b85ff" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="10 14" opacity="0.14"/>
+    <path d="M -80 520 C 440 310, 800 640, 1280 500" fill="none" stroke="#7ec8ff" stroke-width="2.0" stroke-linecap="round" stroke-dasharray="8 16" opacity="0.13"/>
+  </svg>
+</div>
+
+<!-- SVG symbols (no emoji, reusable) -->
+<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+  <symbol id="icon-user" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M16 17c0-2.2-1.8-4-4-4s-4 1.8-4 4"/><circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".35"/></symbol>
+  <symbol id="icon-cursor" viewBox="0 0 24 24"><path fill="currentColor" d="M5.5 3.8l11.2 5.2-4.6 1.2-1.3 4.6z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M9.8 13.6l2.4 3.6"/></symbol>
+  <symbol id="icon-external" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M9 7h8v8"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M7 17L15.5 8.5"/></symbol>
+  <symbol id="icon-link" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M9.8 14.2a3.6 3.6 0 0 1 0-5.1l1.1-1.1a3.6 3.6 0 0 1 5.1 0 3.6 3.6 0 0 1 0 5.1l-.7.7"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M14.2 9.8a3.6 3.6 0 0 1 0 5.1l-1.1 1.1a3.6 3.6 0 0 1-5.1 0 3.6 3.6 0 0 1 0-5.1l.7-.7"/></symbol>
+  <symbol id="icon-spark" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" d="M12 3l1.4 4.6L18 9l-4.6 1.4L12 15l-1.4-4.6L6 9l4.6-1.4z"/><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M19 13l.8 2.2L22 16l-2.2.8L19 19l-.8-2.2L16 16l2.2-.8z"/><path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M5 14l.7 1.6L7.5 16l-1.8.4L5 18l-.7-1.6L2.5 16l1.8-.4z"/></symbol>
+  <symbol id="icon-chevron" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></symbol>
+</svg>
+
+<header id="kitHeader">
+  <div class="header-inner">
+    <a class="kit-logo" href="index.html" aria-label="Milli Kit トップ">
+      <img src="images/rogo/milli-kit-rogo.png" alt="Milli Kit" width="1526" height="424" style="height:32px;width:auto;display:block;object-fit:contain;">
+    </a>
+
+    <nav class="kit-nav" aria-label="メインナビゲーション">
+      <a href="#tools">ツール</a>
+      <a href="#about">このサイトについて</a>
+      <a href="https://milli-orbis-portal.pages.dev/" target="_blank" rel="noopener">Milli Orbis <svg width="12" height="12" aria-hidden="true"><use href="#icon-external"/></svg></a>
+      <a href="https://milli-unishare.pages.dev/" target="_blank" rel="noopener">Milli Unishare <svg width="12" height="12" aria-hidden="true"><use href="#icon-external"/></svg></a>
+    </nav>
+
+    <div class="header-actions">
+      <div class="cursor-wrap" id="cursorWrap">
+        <button id="cursorBtn" class="cursor-btn" aria-label="カーソルを選択" aria-expanded="false" aria-haspopup="menu">
+          <span id="cursorPreview" class="cursor-preview" aria-hidden="true"></span>
+          <span class="cursor-label">カーソル</span>
+          <svg width="14" height="14" aria-hidden="true"><use href="#icon-chevron"/></svg>
+        </button>
+        <div id="cursorDropdown" class="cursor-dropdown" role="menu" aria-hidden="true"></div>
+      </div>
+
+      <button id="profileBtn" class="profile-btn" onclick="kitOpenAccount()" aria-label="アカウント">
+        <span id="profileIcon" class="profile-icon" aria-hidden="true">
+          <svg width="18" height="18" aria-hidden="true"><use href="#icon-user"/></svg>
+        </span>
+        <span id="profileLabel" class="profile-label">ログイン</span>
+      </button>
+
+      <button id="hamburger" class="hamburger" aria-label="メニュー" aria-expanded="false" aria-controls="mobileNav">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+
+  <nav id="mobileNav" class="mobile-nav" aria-hidden="true">
+    <a href="#tools">ツール一覧</a>
+    <a href="#about">このサイトについて</a>
+    <a href="linker/">Milli Linker</a>
+    <a href="https://milli-orbis-portal.pages.dev/" target="_blank" rel="noopener">Milli Orbis</a>
+    <a href="https://milli-unishare.pages.dev/" target="_blank" rel="noopener">Milli Unishare</a>
+    <a href="https://milli-games.pages.dev/" target="_blank" rel="noopener">Milli Games</a>
+  </nav>
+  <div id="drawerBackdrop" class="drawer-backdrop" aria-hidden="true"></div>
+</header>
+
+<main>
+  <!-- Hero -->
+  <section class="hero" id="home">
+    <div class="hero-deco" aria-hidden="true">
+      <span class="deco-dot"></span>
+      <span class="deco-dot small"></span>
+      <span class="deco-ring"></span>
+      <span class="deco-star"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><use href="#icon-spark"/></svg></span>
+    </div>
+    <div class="hero-inner">
+      <p class="hero-eyebrow"><svg width="16" height="16" aria-hidden="true"><use href="#icon-spark"/></svg> あなたの推し活を彩る</p>
+      <h1 class="hero-title">好きを、<br><span class="hero-accent">1枚に。</span></h1>
+      <p class="hero-sub">Milli Kitは、ミリプロファンのための推し活ツール集。<br>第一弾 <strong>Milli Linker</strong> で、推し・ファンネーム・神回を1枚の名刺にまとめてXで共有しよう。</p>
+      <div class="hero-actions">
+        <a href="linker/" class="btn btn-primary">Milli Linker を開く <svg width="16" height="16" aria-hidden="true"><use href="#icon-chevron"/></svg></a>
+        <a href="#tools" class="btn btn-ghost">ツール一覧を見る</a>
+      </div>
+      <div class="hero-meta">
+        <span class="meta-pill"><svg width="14" height="14" aria-hidden="true"><use href="#icon-user"/></svg> Orbisアカウントでログイン</span>
+        <span class="meta-pill"><svg width="14" height="14" aria-hidden="true"><use href="#icon-link"/></svg> Xでそのまま共有</span>
+        <span class="meta-pill"><svg width="14" height="14" aria-hidden="true"><use href="#icon-cursor"/></svg> 推しカーソル対応</span>
+      </div>
+    </div>
+
+    <!-- Preview card (decorative) -->
+    <div class="hero-preview" aria-hidden="true">
+      <div class="preview-card">
+        <div class="preview-card-head">
+          <span class="preview-icon"><img src="images/icon/yura_profile.jpg" alt="" width="36" height="36"></span>
+          <span class="preview-name">ゆらふぃらの例</span>
+          <span class="preview-badge">推し: ゆらぎゆら</span>
+        </div>
+        <div class="preview-thumb">
+          <span class="preview-play"><svg viewBox="0 0 24 24" width="18" height="18" fill="#fff"><path d="M8 5.2a1 1 0 0 1 1.5-.9l8 5.2a1 1 0 0 1 0 1.7l-8 5.2A1 1 0 0 1 8 15.5z"/></svg></span>
+          <span class="preview-time">1:42から再生</span>
+        </div>
+        <p class="preview-text">「この雑談のこの一言が本当に天才！」</p>
+      </div>
+      <div class="preview-card back">
+        <div class="preview-ogp">OGP名刺プレビュー</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tools / Launcher -->
+  <section id="tools" class="section">
+    <div class="section-inner">
+      <h2 class="section-title">ツール</h2>
+      <p class="section-sub">Milli Kit で使えるツール</p>
+      <div id="launcherGrid" class="launcher-grid">
+        <!-- Filled by kit.js -->
+      </div>
+
+      <h3 class="section-title" style="margin-top:32px;font-size:16px;">他サイト</h3>
+      <p class="section-sub">関連サービスへの入口</p>
+      <div id="externalGrid" class="launcher-grid external-grid">
+        <!-- Filled by kit.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section id="about" class="section section-soft">
+    <div class="section-inner narrow">
+      <h2 class="section-title">このサイトについて</h2>
+      <div class="about-card">
+        <p class="lead">Milli Kitは、ファンが運営するミリプロ非公式の推し活ツール集です。ミリプロ公式とは一切関係ありません。</p>
+        <ul class="about-list">
+          <li><svg width="14" height="14" aria-hidden="true"><use href="#icon-link"/></svg> ログインはMilli Orbisアカウント（Firebase Authentication）を共用。 Orbisでログイン済みならそのまま使えます。</li>
+          <li><svg width="14" height="14" aria-hidden="true"><use href="#icon-cursor"/></svg> カーソルはお好みの推しカラーに変更できます。選択はこのサイト内でのみ反映されます。</li>
+          <li><svg width="14" height="14" aria-hidden="true"><use href="#icon-spark"/></svg> 第一弾はMilli Linker。名刺1枚で自己紹介が完結し、Xに貼ると名刺が大きく表示されます。</li>
+        </ul>
+        <p class="about-note">掲載しているタレント情報・画像は、ミリプロ公式サイト等の公開情報に基づいています。メンカラーはファン間の慣習色です。</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="kit-footer">
+  <p class="footer-note">本サイトはファンが運営する非公式サイトです。ミリプロ公式とは一切関係ありません。</p>
+  <p class="footer-note">公式: <a href="https://milpr.com/" target="_blank" rel="noopener">https://milpr.com/</a> ／ 作成: <a href="https://x.com/SunSunmachi" target="_blank" rel="noopener">@SunSunmachi</a></p>
+  <p class="footer-copy">© 2026 Milli Kit</p>
+</footer>
+
+<!-- Account modals (reuse firebase-init.js logic, no emoji) -->
+<div id="acctModal" class="acct-overlay" aria-hidden="true">
+  <div class="acct-box">
+    <button class="acct-close" data-close="acctModal" aria-label="閉じる"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h3 class="acct-title"><svg width="18" height="18" aria-hidden="true"><use href="#icon-link"/></svg> Milli Orbisアカウント連携</h3>
+    <div class="acct-body">
+      <p class="acct-hint">Milli Orbisアカウントでログインすると、Milli Linkerや他サービスとアカウントを共有できます。未ログインでも閲覧は可能です。</p>
+      <div id="mp-account-guest">
+        <div class="acct-row">
+          <button type="button" onclick="mpOpenLogin()">ログイン</button>
+          <button type="button" onclick="mpOpenSignup()">新規登録</button>
+        </div>
+        <p class="acct-hint" style="text-align:center;margin:8px 0;">— または 連携IDを入力 —</p>
+        <div id="mp-id-input">
+          <input id="mp-id" placeholder="連携ID（例: TEST001）" autocomplete="off">
+          <button type="button" onclick="mpSetId()" style="width:100%">連携IDを保存</button>
+        </div>
+        <div class="acct-row" style="margin-top:10px;">
+          <button type="button" onclick="mpOAuthLogin('google')" style="flex:1">Googleでログイン</button>
+          <button type="button" onclick="mpOAuthLogin('twitter')" style="flex:1;background:#111;color:#fff">Xでログイン</button>
+        </div>
+        <p id="mp-msg" class="acct-msg"></p>
+      </div>
+      <div id="mp-account-ok" style="display:none;">
+        <div class="acct-profile">
+          <div id="mp-profile-icon" class="acct-avatar"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 17c0-2.2-1.8-4-4-4s-4 1.8-4 4"/><circle cx="12" cy="8" r="3"/></svg></div>
+          <div><div id="mp-profile-name" style="font-weight:800"></div><div id="mp-profile-msg" style="font-size:12px;color:var(--muted)"></div></div>
+        </div>
+        <p style="font-size:13px;">連携ID: <b id="mp-pid"></b></p>
+        <div class="acct-row">
+          <button type="button" onclick="mpCopyId()">コピー</button>
+          <button type="button" onclick="mpStartEdit()">編集</button>
+          <button type="button" onclick="mpLogout()" style="background:#999;">ログアウト</button>
+        </div>
+        <div id="mp-link-providers" style="margin-top:10px"></div>
+        <div id="mp-link-msg" class="acct-msg"></div>
+        <div class="acct-row" style="margin-top:8px;">
+          <button type="button" onclick="mpOpenMypage()" style="width:100%;">マイページ</button>
+        </div>
+        <div id="mp-account-edit" style="display:none;margin-top:12px;padding-top:12px;border-top:1px dashed var(--border)">
+          <div class="acct-picon-row">
+            <div id="mp-picon-preview" class="acct-avatar" style="width:42px;height:42px;">?</div>
+            <input id="mp-picon" placeholder="アイコン（文字 or 画像URL）" oninput="mpUpdatePiconPreview()" autocomplete="off">
+          </div>
+          <div style="display:flex;gap:8px;margin:8px 0;">
+            <label class="btn btn-ghost" style="font-size:12px;">画像を選ぶ<input type="file" id="mp-edit-icon-file" accept="image/*" hidden onchange="mpPickIconFile(this)"></label>
+            <span class="acct-hint" style="margin:0;align-self:center;">または文字:</span>
+          </div>
+          <input id="mp-pname" placeholder="表示名" maxlength="20" autocomplete="off">
+          <input id="mp-pmsg" placeholder="一言" autocomplete="off">
+          <input id="mp-edit-name" style="display:none;">
+          <div class="acct-row" style="margin-top:8px;">
+            <button type="button" onclick="mpSaveProfile()">保存</button>
+            <button type="button" onclick="mpCancelEdit()" style="background:#999;">キャンセル</button>
+          </div>
+          <p id="mp-edit-note" class="acct-msg"></p>
+          <span id="mp-edit-icon-preview" style="display:none;"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="loginModal" class="acct-overlay" aria-hidden="true">
+  <div class="acct-box">
+    <button class="acct-close" data-close="loginModal" aria-label="閉じる"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h3>ログイン</h3>
+    <div style="padding:0 22px 18px;">
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <button type="button" onclick="mpOAuthLogin('google')" style="flex:1">Google</button>
+        <button type="button" onclick="mpOAuthLogin('twitter')" style="flex:1;background:#111;color:#fff">X</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin:8px 0;color:var(--muted);font-size:12px;"><span style="flex:1;height:1px;background:var(--border)"></span>または<span style="flex:1;height:1px;background:var(--border)"></span></div>
+      <input id="mp-email" type="email" placeholder="メールアドレス" autocomplete="email">
+      <div class="acct-pw-wrap"><input id="mp-pass" type="password" placeholder="パスワード" autocomplete="current-password"><button type="button" class="acct-pw-btn" onclick="mpTogglePw('mp-pass')" aria-label="表示切替"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+      <span id="mp-pass-eye" style="display:none"></span>
+      <button type="button" onclick="mpSubmitLogin()" style="width:100%;">ログイン</button>
+      <p class="acct-msg" id="mp-msg-login"></p><p id="mp-msg" class="acct-msg" style="display:none"></p>
+      <p class="acct-hint" style="text-align:center;">アカウントをお持ちでない場合は <a href="javascript:mpOpenSignup()">新規登録</a></p>
+      <p style="text-align:center;margin-top:6px;"><button type="button" class="btn btn-ghost" onclick="mpOpenReset()" style="font-size:12px;">パスワードをお忘れですか？</button></p>
+    </div>
+  </div>
+</div>
+
+<div id="signupModal" class="acct-overlay" aria-hidden="true">
+  <div class="acct-box">
+    <button class="acct-close" data-close="signupModal" aria-label="閉じる"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h3>新規登録</h3>
+    <div style="padding:0 22px 18px;">
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <button type="button" onclick="mpOAuthLogin('google')" style="flex:1">Google</button>
+        <button type="button" onclick="mpOAuthLogin('twitter')" style="flex:1;background:#111;color:#fff">X</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin:8px 0;color:var(--muted);font-size:12px;"><span style="flex:1;height:1px;background:var(--border)"></span>または<span style="flex:1;height:1px;background:var(--border)"></span></div>
+      <input id="mp-semail" type="email" placeholder="メールアドレス" autocomplete="email"><input id="mp2-email" type="email" style="display:none">
+      <div class="acct-pw-wrap"><input id="mp-spass1" type="password" placeholder="パスワード（6文字以上）" autocomplete="new-password"><button type="button" class="acct-pw-btn" onclick="mpTogglePw('mp-spass1')" aria-label="表示切替"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+      <div class="acct-pw-wrap"><input id="mp-spass2" type="password" placeholder="パスワード（確認）" autocomplete="new-password"><button type="button" class="acct-pw-btn" onclick="mpTogglePw('mp-spass2')" aria-label="表示切替"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+      <input id="mp2-pass" type="password" style="display:none"><input id="mp2-pass2" type="password" style="display:none"><span id="mp2-pass-eye" style="display:none"></span>
+      <button type="button" onclick="mpSubmitSignup()" style="width:100%;">アカウントを作成</button>
+      <p class="acct-msg" id="mp-msg-signup"></p><p id="mp2-msg" class="acct-msg" style="display:none"></p>
+      <p class="acct-hint" style="text-align:center;">既にお持ちの場合は <a href="javascript:mpOpenLogin()">ログイン</a></p>
+    </div>
+  </div>
+</div>
+
+<div id="mypageModal" class="acct-overlay" aria-hidden="true">
+  <div class="acct-box">
+    <button class="acct-close" data-close="mypageModal" aria-label="閉じる"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h3><svg width="16" height="16" aria-hidden="true"><use href="#icon-user"/></svg> マイページ</h3>
+    <div style="padding:0 22px 18px;"><div id="mp-mypage-stats"><p class="acct-hint">読み込み中…</p></div><div class="acct-row" style="margin-top:12px;"><a href="account.html" class="btn" style="width:100%;justify-content:center;text-decoration:none;">マイページを開く</a></div></div>
+  </div>
+</div>
+
+<div id="password-reset-dialog" class="acct-overlay hidden" aria-hidden="true" onclick="if(event.target===this)mpCloseReset()">
+  <div class="acct-box" style="max-width:400px;">
+    <button type="button" class="acct-close" onclick="mpCloseReset()" aria-label="閉じる"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h3>パスワードを再設定</h3>
+    <div style="padding:0 22px 18px;">
+      <p class="acct-hint">登録したメールアドレスに再設定用のリンクを送信します。</p>
+      <input id="reset-email" type="email" placeholder="メールアドレス" autocomplete="email">
+      <button type="button" style="width:100%;" onclick="mpResetSubmit()">メールを送信</button>
+      <p id="reset-msg" class="acct-msg"></p>
+    </div>
+  </div>
+</div>
+
+<div id="login-popup" class="login-popup" style="display:none!important;" aria-hidden="true"><div id="mp-popup-close" style="display:none"></div><div id="mp-account-guest-dup" style="display:none"></div><div id="mp-account-ok-dup" style="display:none"></div><span id="mp-msg-dup" style="display:none"></span></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="firebase-init.js"></script>
+<script src="data/members.js"></script>
+<script src="data.js"></script>
+<script src="scripts/cursor.js"></script>
+<script src="kit.js"></script>
+</body>
+</html>
