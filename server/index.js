@@ -262,18 +262,18 @@ async function renderCardOgp(opts){
   // shoulder — add extra line spacing to avoid overlap with subLine on server fonts
   if(shoulderTitle){
     svg+=`<text x="${textX}" y="${shoulderY}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="22" font-weight="600" fill="#6b6a7a">${escXml(shoulderTitle)}</text>`;
-    shoulderY += 4; // extra padding for server font metrics
+    shoulderY += 8; // extra padding for server font metrics (was 4)
   }
   // sub (x + oshiHistory)
   if(subLine){
     // move subLine a bit lower when shoulder exists to avoid overlap
-    const subYAdj = shoulderTitle ? subY+6 : subY;
+    const subYAdj = shoulderTitle ? subY+12 : subY;
     svg+=`<text x="${textX}" y="${subYAdj}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="20" font-weight="600" fill="#6b6a7a">${escXml(subLine)}</text>`;
   }
   // fanMark + fanName + oshiMark + favCount + badge
   {
-    // use adjusted subY when shoulder exists (extra 6px added for server font)
-    let fy = subLine ? (shoulderTitle ? subY+44 : subY+38) : (shoulderTitle? shoulderY+34 : nameY+40);
+    // use adjusted subY when shoulder exists (extra 12px added for server font)
+    let fy = subLine ? (shoulderTitle ? subY+50 : subY+38) : (shoulderTitle? shoulderY+38 : nameY+40);
     let tspan = "";
     if(fanMarkEmojis){
       tspan += `<tspan fill="#6b6a7a">${escXml(fanMarkEmojis)}</tspan><tspan dx="10"></tspan>`;
