@@ -3,9 +3,17 @@
 // GET /cardOgp?uid=xx&lang=ja  名刺PNG (1200x630)
 // GET /cardOgp?demo=1  フォント確認用サンプル
 "use strict";
+const path = require("path");
+const fs = require("fs");
+// 同梱フォントをfontconfigに見せる (sharpより前に設定する必要あり)
+try {
+  const conf = path.join(__dirname, "fonts", "fonts.conf");
+  if (fs.existsSync(conf) && !process.env.FONTCONFIG_FILE) {
+    process.env.FONTCONFIG_FILE = conf;
+  }
+} catch (e) {}
 const express = require("express");
 const sharp = require("sharp");
-const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -106,7 +114,7 @@ app.get("/health", (req, res) => res.json({ ok: true }));
 app.get("/debug", (req, res) => {
   const fs = require("fs");
   const cp = require("child_process");
-  const out = { home: process.env.HOME || null, cwd: process.cwd() };
+  const out = { home: process.env.HOME || null, cwd: process.cwd(), fontconfig_file: process.env.FONTCONFIG_FILE || null };
   for (const d of ["/root/.fonts", `${process.env.HOME || ""}/.fonts`, path.join(__dirname, "fonts")]) {
     try {
       out[d] = fs.readdirSync(d);
