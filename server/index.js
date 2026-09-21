@@ -25,6 +25,21 @@ try {
 } catch (e) {
   console.warn("members.json load failed", e.message);
 }
+// LINKER_MEMBERS（グループ: nova/uni/sona を含む）を統合 — members.json にはグループが無いため
+try {
+  const vm2 = require("vm");
+  const src2 = fs.readFileSync(path.join(__dirname, "..", "data", "members.js"), "utf8");
+  const ctx2 = {};
+  vm2.createContext(ctx2);
+  vm2.runInContext(src2 + '\nthis.__L=LINKER_MEMBERS;', ctx2, { timeout: 5000 });
+  if (Array.isArray(ctx2.__L)) {
+    const map = new Map(MEMBERS.map((m) => [m.id, m]));
+    for (const m of ctx2.__L) if (!map.has(m.id)) map.set(m.id, m);
+    MEMBERS = Array.from(map.values());
+  }
+} catch (e) {
+  console.warn("linker members load failed", e.message);
+}
 // data.js の MEMBERS(ファンネーム等) を副作用なしで読む
 let FULL = [];
 try {
@@ -90,7 +105,17 @@ async function renderCardOgp({ name, icon, ultimate, oshiMark, lang }) {
   const displayName = name || "";
 
   let iconPng = null;
-  if (icon && /^https?:\/\//.test(icon)) {
+  if (icon && icon.startsWith("data:image/")) {
+    try {
+      const b64 = icon.split(",")[1];
+      if (b64) {
+        const buf = Buffer.from(b64, "base64");
+        if (buf.length <= 8 * 1024 * 1024) {
+          iconPng = await sharp(buf).resize(140, 140, { fit: "cover" }).png().toBuffer();
+        }
+      }
+    } catch (e) { iconPng = null; }
+  } else if (icon && /^https?:\/\//.test(icon)) {
     const buf = await fetchBuffer(icon);
     if (buf) {
       try {
