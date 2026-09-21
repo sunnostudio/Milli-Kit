@@ -140,7 +140,7 @@ async function load(){
       </div>
       <div style="margin-top:12px;text-align:center;"><img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(link)}" alt="QR" width="160" height="160" style="border:1px solid #e5e3f2;border-radius:12px;background:#fff;padding:6px;"><div style="font-size:11px;color:#6b6a7a;margin-top:4px;">QRコード</div></div>
     </div>`:""}
-    <details style="font-size:11px;color:#6b6a7a;background:#fff;border:1px dashed #e5e3f2;border-radius:12px;padding:10px;"><summary style="cursor:pointer;font-weight:700;">OGP画像について</summary><p style="margin-top:6px;word-break:break-all;">OGPは <code>https://milli-unishare-og.onrender.com/cardOgp?uid=${uid||"local"}</code> で生成されます。Xに貼ると名刺が大きく表示されます。</p></details>
+    <details style="font-size:11px;color:#6b6a7a;background:#fff;border:1px dashed #e5e3f2;border-radius:12px;padding:10px;"><summary style="cursor:pointer;font-weight:700;">OGP画像について</summary><p style="margin-top:6px;word-break:break-all;">OGPは <code>https://milli-kit-og.onrender.com/cardOgp?uid=${uid||"local"}</code> で生成されます。Xに貼ると名刺が大きく表示されます。</p></details>
   `;
 }
 document.addEventListener("DOMContentLoaded", load);

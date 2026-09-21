@@ -2,6 +2,7 @@
 "use strict";
 
 const SNS_TYPES = [
+  {v:"x", label:"X", placeholder:"@xxx または https://x.com/xxx（サブ垢用）", pattern:"x"},
   {v:"youtube", label:"YouTube", placeholder:"https://www.youtube.com/@... や https://youtu.be/...", pattern:"youtube"},
   {v:"discord", label:"Discord", placeholder:"ユーザー名、ID、または招待リンク（例: @xxx / discord.gg/xxx）", pattern:"discord"},
   {v:"instagram", label:"Instagram", placeholder:"https://www.instagram.com/xxx", pattern:"instagram"},
@@ -25,6 +26,7 @@ function initLinker(){
   bindPreview();
   // load existing if any
   loadDraft();
+  syncFavDisable();
   checkCloudinaryConfig();
 }
 function checkCloudinaryConfig(){
@@ -41,16 +43,26 @@ function checkCloudinaryConfig(){
 
 function syncFavDisable(){
   const ultimate=document.getElementById("oshiUltimate")?.dataset.value||"";
+  const grp=(typeof GROUP_MEMBERS!=="undefined"&&GROUP_MEMBERS[ultimate])||null;
   document.querySelectorAll("#oshiFavs .custom-opt").forEach(b=>{
     const isUlt = b.dataset.id===ultimate && ultimate!=="";
-    b.disabled=isUlt;
-    b.style.opacity=isUlt?"0.45":"";
-    b.style.pointerEvents=isUlt?"none":"";
-    if(isUlt && b.classList.contains("active")){
+    const isGrpMember = !!(grp && grp.includes(b.dataset.id));
+    const dis=isUlt||isGrpMember;
+    b.disabled=dis;
+    b.style.opacity=dis?"0.45":"";
+    b.style.pointerEvents=dis?"none":"";
+    if(dis && b.classList.contains("active")){
       b.classList.remove("active");
       const box=b.querySelector(".custom-box"); const sv=box?.querySelector("svg");
       if(sv) sv.style.display="none";
       if(box){ box.style.background="#fff"; box.style.borderColor="#c8c6de"; }
+    }
+    if(isGrpMember && !isUlt){
+      b.title="最推しグループのメンバーのため選択できません";
+    } else if(isUlt){
+      b.title="";
+    } else {
+      b.title="";
     }
   });
 }
@@ -266,8 +278,9 @@ function initSns(){
           ${SNS_TYPES.map(s=>`<button type="button" role="option" data-value="${s.v}" data-placeholder="${escAttr(s.placeholder)}">${esc(s.label)}</button>`).join("")}
         </div>
       </div>
-      <div class="kit-input-wrap" style="flex:1"><input class="kit-input sns-url" type="text" placeholder="${escAttr(ph)}"><span class="kit-input-focus"></span></div>
+      <div class="kit-input-wrap" style="flex:1"><input class="kit-input sns-url" type="text" placeholder="${escAttr(ph)}" value="${escAttr(pref.url||"")}"><span class="kit-input-focus"></span></div>
       <button type="button" class="sns-remove" aria-label="削除"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><use href="#icon-trash"/></svg></button>
+      <div class="kit-input-wrap sns-memo-wrap"><input class="kit-input sns-memo" type="text" maxlength="30" placeholder="メモ（任意：例 サブ垢・告知用）" value="${escAttr(pref.memo||"")}"><span class="kit-input-focus"></span></div>
     `;
     const root=row.querySelector(".custom-select");
     const trigger=row.querySelector(".custom-select-trigger");
@@ -283,6 +296,9 @@ function initSns(){
       root.classList.remove("open"); updatePreview(); saveDraft();
     }));
     input.addEventListener("input", ()=>{ updatePreview(); saveDraft(); });
+    const memo=row.querySelector(".sns-memo");
+    if(pref.type && root){ root.dataset.value=pref.type; }
+    if(memo) memo.addEventListener("input", ()=>{ updatePreview(); saveDraft(); });
     row.querySelector(".sns-remove").addEventListener("click", ()=>{ row.remove(); updatePreview(); saveDraft(); });
     document.addEventListener("click", ()=> root.classList.remove("open"));
     list.appendChild(row);
@@ -668,6 +684,7 @@ function updatePreview(){
   const snsFromRows=[...document.querySelectorAll("#snsList .sns-row")].map(r=>{
     const t=r.querySelector(".custom-select")?.dataset.value;
     const u=r.querySelector(".sns-url")?.value.trim();
+    const memo=r.querySelector(".sns-memo")?.value.trim()||"";
     if(!t||!u) return null;
     const url=snsToUrl(t,u);
     const label=SNS_TYPES.find(x=>x.v===t)?.label||t;
@@ -678,16 +695,16 @@ function updatePreview(){
       const iconId=iconMap[t]||"icon-link";
       iconHtml=`<svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><use href="#${iconId}"/></svg>`;
     }
-    return {type:t, url, label, iconHtml};
+    return {type:t, url, label, memo, iconHtml};
   }).filter(Boolean);
   if(xUrlRaw){
     const xUrlNorm=snsToUrl("x", xUrlRaw);
     if(xUrlNorm){
       const xIcon=`<svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-x"/></svg>`;
-      snsFromRows.unshift({type:"x", url:xUrlNorm, label:"X", iconHtml:xIcon});
+      snsFromRows.unshift({type:"x", url:xUrlNorm, label:"X", memo:"", iconHtml:xIcon});
     }
   }
-  const snsRows=snsFromRows.map(s=>`<a href="${escAttr(s.url)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:5px;border:1px solid #e5e3f2;border-radius:999px;padding:4px 10px;background:#fff;font-size:11px;font-weight:700;text-decoration:none;color:#222;">${s.iconHtml}${esc(s.label)}</a>`).join(" ");
+  const snsRows=snsFromRows.map(s=>`<a href="${escAttr(s.url)}" target="_blank" rel="noopener" title="${escAttr(s.memo||s.label)}" style="display:inline-flex;align-items:center;gap:5px;border:1px solid #e5e3f2;border-radius:999px;padding:4px 10px;background:#fff;font-size:11px;font-weight:700;text-decoration:none;color:#222;">${s.iconHtml}${esc(s.label)}${s.memo?`<span style="font-weight:400;color:#8a86a3;">${esc(s.memo)}</span>`:""}</a>`).join(" ");
 
   // kami (up to 6)
   let kamiThumbHtml="";
@@ -817,7 +834,7 @@ function saveDraft(){
       xUrl: document.getElementById("fieldX")?.value || document.getElementById("xFieldWrap")?.dataset.value || "",
       ogpFontJa: document.querySelector('.custom-select[data-name="ogpFontJa"]')?.dataset.value || "",
       ogpFontEn: document.querySelector('.custom-select[data-name="ogpFontEn"]')?.dataset.value || "",
-      sns: [...document.querySelectorAll("#snsList .sns-row")].map(r=> ({type:r.querySelector(".custom-select")?.dataset.value||"", url:r.querySelector(".sns-url")?.value||""}))
+      sns: [...document.querySelectorAll("#snsList .sns-row")].map(r=> ({type:r.querySelector(".custom-select")?.dataset.value||"", url:r.querySelector(".sns-url")?.value||"", memo:r.querySelector(".sns-memo")?.value||""}))
     };
     localStorage.setItem("milli-linker-draft", JSON.stringify(draft));
   }catch(e){}
@@ -883,9 +900,11 @@ function loadDraft(){
           const root=last.querySelector(".custom-select");
           const valEl=last.querySelector(".custom-select-value");
           const input=last.querySelector(".sns-url");
+          const memoEl=last.querySelector(".sns-memo");
           if(root) root.dataset.value=s.type;
           if(valEl) valEl.textContent=SNS_TYPES.find(x=>x.v===s.type)?.label||s.type;
           if(input) input.value=s.url;
+          if(memoEl) memoEl.value=s.memo||"";
         }
       });
     }
@@ -947,7 +966,7 @@ function collectPayload(){
     oshiMark: document.getElementById("fieldOshiMark")?.value||"",
     ogpFontJa: document.querySelector('.custom-select[data-name="ogpFontJa"]')?.dataset.value || "'M PLUS Rounded 1c','Noto Sans JP',sans-serif",
     ogpFontEn: document.querySelector('.custom-select[data-name="ogpFontEn"]')?.dataset.value || "'Barlow',sans-serif",
-    sns: [...document.querySelectorAll("#snsList .sns-row")].map(r=> ({type:r.querySelector(".custom-select")?.dataset.value||"", url:r.querySelector(".sns-url")?.value||""})).filter(x=>x.type&&x.url),
+    sns: [...document.querySelectorAll("#snsList .sns-row")].map(r=> ({type:r.querySelector(".custom-select")?.dataset.value||"", url:r.querySelector(".sns-url")?.value||"", memo:r.querySelector(".sns-memo")?.value||""})).filter(x=>x.type&&x.url),
     xUrl: document.getElementById("fieldX")?.value|| document.getElementById("xFieldWrap")?.dataset.value||"",
     updatedAt: Date.now()
   };
@@ -1010,7 +1029,7 @@ function showShareModal(link, payload){
   const oshiNameShare = mShare ? mShare.name : (payload.ultimate||"");
   const xTextStr=`${payload.name||"私"}のMilli Linker名刺 — 最推し ${oshiNameShare} ${link} #ミリプロ #MilliKit #MilliLinker`;
   xText.textContent=xTextStr;
-  const ogpUrl=`https://milli-unishare-og.onrender.com/cardOgp?uid=${encodeURIComponent(payload.uid||"local")}&v=${payload.updatedAt}`;
+  const ogpUrl=`https://milli-kit-og.onrender.com/cardOgp?uid=${encodeURIComponent(payload.uid||"local")}&v=${payload.updatedAt}`;
   ogpEl.textContent=ogpUrl;
   xBtn.href=`https://twitter.com/intent/tweet?text=${encodeURIComponent(xTextStr)}`;
   qr.src=`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(link)}`;

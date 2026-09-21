@@ -146,9 +146,11 @@
 
 /* SNS list */
 .sns-list{ display:grid; gap:8px; }
-.sns-row{ display:flex; gap:8px; align-items:center; }
+.sns-row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
 .sns-row .custom-select{ flex:0 0 160px; }
 .sns-row .kit-input-wrap{ flex:1; }
+.sns-memo-wrap{ flex:1 1 100%; }
+.sns-memo-wrap .sns-memo{ font-size:12px; padding:6px 10px; }
 .sns-remove{ width:34px; height:34px; border-radius:50%; border:1px solid #e5e3f2; background:#fff; display:grid; place-items:center; cursor:pointer; color:#8a7a96; }
 
 /* preview pane — independent scroll so OGP never gets cut off */

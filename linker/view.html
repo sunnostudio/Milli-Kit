@@ -217,17 +217,17 @@ async function load(){
     if(type==="line") return raw.includes("line.me")?`https://${raw.replace(/^https?:\/\//,"")}`:raw;
     return raw;
   }
-  let snsList=(data.sns||[]).filter(s=>s.type&&s.url).map(s=> ({type:s.type, url:normalizeSnsUrl(s.type,s.url), label: (s.type==="x"?"X": s.type==="youtube"?"YouTube": s.type.charAt(0).toUpperCase()+s.type.slice(1)) }));
+  let snsList=(data.sns||[]).filter(s=>s.type&&s.url).map(s=> ({type:s.type, url:normalizeSnsUrl(s.type,s.url), memo:s.memo||"", label: (s.type==="x"?"X": s.type==="youtube"?"YouTube": s.type.charAt(0).toUpperCase()+s.type.slice(1)) }));
   // xUrlを先頭に追加（重複回避）
   if(data.xUrl){
     const xNorm=normalizeSnsUrl("x", data.xUrl);
     if(!snsList.some(s=>s.type==="x" && s.url===xNorm)){
-      snsList.unshift({type:"x", url:xNorm, label:"X"});
+      snsList.unshift({type:"x", url:xNorm, memo:"", label:"X"});
     }
   }
   const snsHtml=snsList.map(s=>{
     const icon=snsIcon(s.type);
-    return `<a href="${s.url}" target="_blank" rel="noopener" title="${esc(s.label)}">${icon}${esc(s.label)}</a>`;
+    return `<a href="${s.url}" target="_blank" rel="noopener" title="${esc(s.memo||s.label)}">${icon}${esc(s.label)}${s.memo?`<span style="font-weight:400;color:#8a86a3;">${esc(s.memo)}</span>`:""}</a>`;
   }).join("");
   const favs=(data.favs||[]).map(id=>{
     const m=LINKER_MEMBERS.find(x=>x.id===id)||MEMBERS.find(x=>x.id===id);

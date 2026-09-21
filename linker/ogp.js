@@ -4,7 +4,7 @@
 const FANMARK_EMOJI = {
   konomi:"🐺🍫", nono:"🎧🤍", akubi:"👿♠︎", koma:"⛩️🔅", raco:"🦦💛", yura:"🌙🫧",
   nuhu:"🌈🖍️", tsukuri:"☁️🔧", liz:"🌂🖤", rei:"🩵🥽", mahoro:"🍓🦌", aoi:"🐢🌱",
-  nova:"🦦💛🌙🫧🌈🖍️🐢🌱", uni:"☁️🔧🌂🖤🩵🥽", sona:"🎧🤍👿♠︎🍓🦌"
+  nova:"🦦💛 / 🌙🫧 / 🌈🖍️ / 🐢🌱", uni:"☁️🔧 / 🌂🖤 / 🩵🥽", sona:"🎧🤍 / 👿♠︎ / 🍓🦌"
 };
 const GROUP_MEMBERS = {
   nova: ["raco","yura","nuhu","aoi"],
@@ -144,13 +144,19 @@ async function drawOgpToCanvas(canvas, opts){
   // talent watermark — single or group (overlapping, bottom aligned, opaque)
   if(GROUP_MEMBERS[ultimate] && groupTalentImgs.length){
     ctx.save(); ctx.globalAlpha=1.0;
-    const tw=420, th=460;
+    // 右下固定で左上へ1.2x拡大 (旧420x460 → 504x552)
+    const tw=504, th=552;
     const tx=W - tw - 18, ty=H - th - 18;
     const n=groupTalentImgs.length;
     const gIds=GROUP_MEMBERS[ultimate];
+    // 素材の余白差を吸収する見た目補正 (下端基準で拡大、はみ出しは上方向)
+    // SONA: nono(上1.2x枠なので基準1.0) / akubi / mahoro(余白大)を均等化
+    const VISUAL_FIX={ mahoro:1.16, akubi:1.07 };
+    // SONAのみ配置そのまま一回り縮小
+    const SONA_DOWN=(ultimate==="sona")?0.93:1;
     if(n===3){
-      // △配置: 上1・下2 — 左上1.2x
-      const baseW=247, baseH=325;
+      // △配置: 上1・下2 — 上を1.2x (右下固定)
+      const baseW=296, baseH=390;
       const thumbW0=baseW*1.2, thumbH0=baseH*1.2;
       const positions=[
         {x: tx+tw/2-thumbW0/2, y: ty+2, w: thumbW0, h: thumbH0},
@@ -163,15 +169,16 @@ async function drawOgpToCanvas(canvas, opts){
         const yOff=(mId==="aoi"?10:(mId==="tsukuri"||mId==="tukuri"?6:0));
         const pos=positions[idx]||positions[0];
         const pw=pos.w, ph=pos.h;
-        const scale=Math.min(pw/img.width, ph/img.height);
+        const fix=(VISUAL_FIX[mId]||1)*SONA_DOWN;
+        const scale=Math.min(pw/img.width, ph/img.height)*fix;
         const dw=img.width*scale, dh=img.height*scale;
         const dx=pos.x + (pw-dw)/2;
         const dy=pos.y + (ph-dh) + yOff;
         ctx.drawImage(img, dx, dy, dw, dh);
       });
     } else {
-      // □配置: 2×2 — 左上1.2x、右下そのまま
-      const baseW=221, baseH=299;
+      // □配置: 2×2 — 左上1.2x、右下固定で全体1.2x
+      const baseW=265, baseH=359;
       const bigW=baseW*1.2, bigH=baseH*1.2;
       const positions=[
         {x: tx+4, y: ty+4, w: bigW, h: bigH},
@@ -185,7 +192,8 @@ async function drawOgpToCanvas(canvas, opts){
         const yOff=(mId==="aoi"?10:(mId==="tsukuri"||mId==="tukuri"?6:0));
         const pos=positions[idx]||positions[0];
         const pw=pos.w, ph=pos.h;
-        const scale=Math.min(pw/img.width, ph/img.height);
+        const fix=VISUAL_FIX[mId]||1;
+        const scale=Math.min(pw/img.width, ph/img.height)*fix;
         const dw=img.width*scale, dh=img.height*scale;
         const dx=pos.x + (pw-dw)/2;
         const dy=pos.y + (ph-dh) + yOff;
