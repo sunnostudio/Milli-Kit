@@ -220,3 +220,8 @@
 /* actions */
 .form-actions{ padding:8px 0 24px; }
 
+/* X in-app / mobile tap fix — ensure all header buttons are tappable inside Twitter's webview */
+.linker-header .kit-btn{ touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
+.linker-header{ overflow:visible; }
+#resetBtn, #saveBtn, #previewToggle, #linkerLoginBtn{ position:relative; z-index:1; pointer-events:auto; }
+

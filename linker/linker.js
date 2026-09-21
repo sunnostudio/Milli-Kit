@@ -672,27 +672,83 @@ function lightenColor(hex, amt){
   }catch(e){ return "#fff"; }
 }
 let _saveWasReady=null;
+function isFirebaseAuthed(){
+  try{
+    if(typeof getMilliproUid==="function"){
+      const u=getMilliproUid();
+      if(u) return true;
+    }
+    if(typeof firebase!=="undefined" && firebase.auth && firebase.auth().currentUser && firebase.auth().currentUser.uid) return true;
+  }catch(e){}
+  return false;
+}
+function showLoginRequiredModal(){
+  const m=document.getElementById("loginRequiredModal");
+  if(m){ m.classList.add("open"); m.setAttribute("aria-hidden","false"); return; }
+  if(typeof mpOpenLogin==="function") return mpOpenLogin();
+  if(typeof mpOpen==="function") return mpOpen();
+  alert("公開するにはログインが必要です。ヘッダーの「ログイン」からログインしてください。");
+}
+function updateAuthUI(){
+  const authed=isFirebaseAuthed();
+  const loginBtn=document.getElementById("linkerLoginBtn");
+  if(loginBtn){
+    if(authed){
+      loginBtn.textContent="マイページ";
+      loginBtn.style.display="";
+      loginBtn.title="ログイン中 — マイページへ";
+      loginBtn.onclick=()=> location.href="../mypage.html";
+    } else {
+      loginBtn.textContent="ログイン";
+      loginBtn.style.display="";
+      loginBtn.title="公開するにはログインが必要です";
+      loginBtn.onclick=()=> { if(typeof mpOpen==="function") mpOpen(); else if(typeof mpOpenLogin==="function") mpOpenLogin(); else location.href="../mypage.html"; };
+    }
+  }
+  // also refresh save button state
+  updateSaveBtnState();
+}
 function updateSaveBtnState(){
   const name=(document.getElementById("fieldName")?.value||"").trim();
   const ult=document.getElementById("oshiUltimate")?.dataset.value||"";
   const missing=[];
   if(!name) missing.push("名前");
   if(!ult) missing.push("最推し");
-  const ready=missing.length===0;
+  const formReady=missing.length===0;
+  const authed=isFirebaseAuthed();
+  const ready=formReady && authed;
+  const needLogin=formReady && !authed;
   ["saveBtn","saveBtn2"].forEach(id=>{
     const b=document.getElementById(id);
     if(!b) return;
-    b.classList.toggle("is-incomplete",!ready);
-    b.classList.toggle("is-ready",ready);
-    b.disabled=!ready;
-    b.title=ready?"公開できます":("あと「"+missing.join("・")+"」を入力してください");
-    if(ready && _saveWasReady===false){
-      b.classList.remove("btn-pop"); void b.offsetWidth; b.classList.add("btn-pop");
+    // 未入力なら無効、ログインだけ不足なら有効にして押したらログインを促す
+    if(!formReady){
+      b.classList.add("is-incomplete"); b.classList.remove("is-ready");
+      b.disabled=true;
+      b.title="あと「"+missing.join("・")+"」を入力してください";
+    } else if(needLogin){
+      b.classList.remove("is-incomplete"); b.classList.add("is-ready");
+      b.disabled=false;
+      b.title="公開するにはログインが必要です — タップでログイン";
+      if(needLogin && _saveWasReady!==true){
+        // 軽いポップ演出はログイン不足でも出さない
+      }
+    } else {
+      b.classList.remove("is-incomplete"); b.classList.add("is-ready");
+      b.disabled=false;
+      b.title="公開できます";
+      if(ready && _saveWasReady===false){
+        b.classList.remove("btn-pop"); void b.offsetWidth; b.classList.add("btn-pop");
+      }
     }
   });
   const hint=document.getElementById("saveHint");
-  if(hint) hint.textContent=ready?"公開できます！":("あと「"+missing.join("・")+"」で公開できます");
-  _saveWasReady=ready;
+  if(hint){
+    if(!formReady) hint.textContent="あと「"+missing.join("・")+"」で公開できます";
+    else if(needLogin) hint.textContent="あとログインで公開できます — 「公開する」を押すとログイン画面が開きます";
+    else hint.textContent="公開できます！";
+  }
+  _saveWasReady=formReady;
 }
 function updatePreview(){
   updateSaveBtnState();
@@ -850,13 +906,8 @@ function favFavs(ids){
   return "/" + names.join("/");
 }
 function isLoggedIn(){
-  try{
-    if(typeof firebase!=="undefined" && firebase.auth && firebase.auth().currentUser) return true;
-    const raw=localStorage.getItem("millipro_userdata");
-    if(raw){ const d=JSON.parse(raw); if(d.playerId||d.playerName) return true; }
-    if(localStorage.getItem("millipro_userId")||localStorage.getItem("millipro_uid")) return true;
-  }catch(e){}
-  return false;
+  // 後方互換: 旧来のゆるい判定（localStorageだけでtrue）は公開可否には使わない。厳密な判定は isFirebaseAuthed() を使う。
+  return isFirebaseAuthed();
 }
 function saveDraft(){
   try{
@@ -1028,6 +1079,11 @@ function collectPayload(){
   };
 }
 function showShareModal(link, payload){
+  // ガード: 未ログインのlocalリンクでX投稿させない
+  if(!link || link.includes("local=1") || !payload.uid || payload.uid==="local"){
+    showLoginRequiredModal();
+    return;
+  }
   let modal=document.getElementById("shareModal");
   if(!modal){
     modal=document.createElement("div");
@@ -1101,7 +1157,25 @@ function showShareModal(link, payload){
   modal.style.display="grid";
 }
 function resetAll(){
-  if(!confirm("入力内容を全てリセットしますか？ 保存された下書きも削除されます。")) return;
+  // X in-app (Twitter/Line) では原生confirmがブロックされることがあるため、カスタムモーダルを優先
+  const isInApp = (typeof isOAuthInAppBrowser==="function" && isOAuthInAppBrowser()) || /Twitter|Line|FBAN|FBAV/i.test(navigator.userAgent||"");
+  const modal=document.getElementById("resetConfirmModal");
+  if(isInApp && modal){
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden","false");
+    // doResetAllはモーダルのボタンから呼ばれる
+    return;
+  }
+  try{
+    if(!confirm("入力内容を全てリセットしますか？ 保存された下書きも削除されます。")) return;
+  }catch(e){
+    // confirmが例外やブロックされた場合はモーダルにフォールバック
+    if(modal){ modal.classList.add("open"); modal.setAttribute("aria-hidden","false"); return; }
+    return;
+  }
+  doResetAll();
+}
+function doResetAll(){
   localStorage.removeItem("milli-linker-draft");
   // clear form
   const form=document.getElementById("linkerForm");
@@ -1139,14 +1213,27 @@ function initSave(){
   const btn=document.getElementById("saveBtn");
   const btn2=document.getElementById("saveBtn2");
   const resetBtn=document.getElementById("resetBtn");
-  if(resetBtn) resetBtn.addEventListener("click", resetAll);
-  function onSave(){
+  // X in-app (Twitter) などでは click が届かないことがあるため touchend も購読し、pointer系の不具合対策も入れる
+  if(resetBtn){
+    const bindReset=(e)=>{
+      // 二重発火防止: touchend→click の両方は1回だけ実行
+      if(e && e.type==="touchend") e.preventDefault();
+      resetAll();
+    };
+    resetBtn.addEventListener("click", bindReset, {passive:false});
+    resetBtn.addEventListener("touchend", bindReset, {passive:false});
+    // 明示的に押せるようにする（iOSの300msやoverlay対策）
+    resetBtn.style.touchAction="manipulation";
+    resetBtn.style.webkitTapHighlightColor="transparent";
+  }
+  // 公開ボタンも同様に touchend 対応（ログイン誘導がX内ブラウザでも確実に開くように）
+  function onSave(e){
+    if(e && e.type==="touchend" && e.cancelable) e.preventDefault();
     saveDraft();
     const payload=collectPayload();
     const ng = checkNGWords(payload);
     if(ng){
       alert(`NGワードが含まれています: [${ng.word}]（${ng.field}）\n修正してから再度公開してください。`);
-      // 該当フィールドにフォーカス（ひとこと優先）
       const map = { "ひとこと":"fieldFree", "肩書き":"fieldTitle", "名前":"fieldName", "推しマーク":"fieldOshiMark" };
       const id = map[ng.field] || (ng.field.startsWith("神回") ? "kamiList" : ng.field.startsWith("好きな曲") ? "songList" : ng.field.startsWith("ギャラリー") ? "galleryGrid" : ng.field.startsWith("SNS") ? "snsList" : null);
       if(id){
@@ -1155,23 +1242,41 @@ function initSave(){
       }
       return;
     }
+    // ログイン必須チェック — 未ログインならクラウド保存せずログインモーダルを出す
+    if(!isFirebaseAuthed()){
+      saveDraft(); // 下書きは残す
+      showLoginRequiredModal();
+      updateAuthUI();
+      return;
+    }
     let uid=null;
     try{
-      if(typeof firebase!=="undefined" && firebase.auth().currentUser) uid=firebase.auth().currentUser.uid;
+      if(typeof getMilliproUid==="function") uid=getMilliproUid();
+      if(!uid && typeof firebase!=="undefined" && firebase.auth().currentUser) uid=firebase.auth().currentUser.uid;
     }catch(e){}
-    payload.uid=uid||"local";
-    if(uid){
-      try{
-        firebase.database().ref(`millipro/linker/${uid}`).set(payload).catch(e=> console.warn(e));
-      }catch(e){ console.warn(e); }
+    if(!uid){
+      showLoginRequiredModal();
+      return;
     }
-    const link = uid ? `${location.origin}/linker/view.html?uid=${uid}` : `${location.origin}/linker/view.html?local=1`;
-    if(btn) { btn.textContent="公開しました"; setTimeout(()=> btn.textContent="公開する", 1500); }
-    if(btn2){ btn2.textContent="公開しました"; setTimeout(()=> btn2.textContent="公開する", 1500); }
+    payload.uid=uid;
+    try{
+      firebase.database().ref(`millipro/linker/${uid}`).set(payload).catch(e=> console.warn(e));
+    }catch(e){ console.warn(e); }
+    const link = `${location.origin}/linker/view.html?uid=${uid}`;
+    if(btn) { const orig=btn.textContent; btn.textContent="公開しました"; setTimeout(()=> btn.textContent=orig, 1500); }
+    if(btn2){ const orig2=btn2.textContent; btn2.textContent="公開しました"; setTimeout(()=> btn2.textContent=orig2, 1500); }
     showShareModal(link, payload);
   }
-  if(btn) btn.addEventListener("click", onSave);
-  if(btn2) btn2.addEventListener("click", onSave);
+  if(btn){
+    btn.addEventListener("click", onSave, {passive:false});
+    btn.addEventListener("touchend", onSave, {passive:false});
+    btn.style.touchAction="manipulation";
+  }
+  if(btn2){
+    btn2.addEventListener("click", onSave, {passive:false});
+    btn2.addEventListener("touchend", onSave, {passive:false});
+    btn2.style.touchAction="manipulation";
+  }
 }
 
 function resolveIcon(p){
@@ -1180,6 +1285,46 @@ function resolveIcon(p){
   if(p.startsWith("../")) return p;
   return "../"+p;
 }
+function initLinkerAuthWatch(){
+  updateAuthUI();
+  // Firebaseの準備が遅れるためポーリング+イベントの両方で追従
+  let lastAuthed=isFirebaseAuthed();
+  setInterval(()=>{
+    const cur=isFirebaseAuthed();
+    if(cur!==lastAuthed){ lastAuthed=cur; updateAuthUI(); }
+  }, 800);
+  try{
+    if(typeof onMilliproAuth==="function"){
+      onMilliproAuth(()=> updateAuthUI());
+    }
+  }catch(e){}
+  try{
+    if(typeof firebase!=="undefined" && firebase.auth && typeof firebase.auth().onAuthStateChanged==="function"){
+      firebase.auth().onAuthStateChanged(()=> updateAuthUI());
+    } else {
+      // firebaseがまだ読まれていない場合、少し待って再試行
+      setTimeout(()=>{
+        try{ if(typeof firebase!=="undefined" && firebase.auth && typeof firebase.auth().onAuthStateChanged==="function") firebase.auth().onAuthStateChanged(()=> updateAuthUI()); }catch(e){}
+      }, 1500);
+    }
+  }catch(e){}
+  // loginRequiredModal の外側クリックで閉じる
+  const lr=document.getElementById("loginRequiredModal");
+  if(lr){
+    lr.addEventListener("click", (e)=>{ if(e.target===lr) lr.classList.remove("open"); });
+  }
+  // 既存のacct-overlayの閉じる挙動をlinkerでも有効化（firebase-init.jsのbindPopupCloseがlinkerのDOMに間に合わない場合の保険）
+  document.querySelectorAll("[data-close]").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      const id=b.getAttribute("data-close");
+      const el=document.getElementById(id);
+      if(el) el.classList.remove("open");
+    });
+  });
+  document.querySelectorAll(".acct-overlay").forEach(ov=>{
+    ov.addEventListener("click", (e)=>{ if(e.target===ov) ov.classList.remove("open"); });
+  });
+}
 document.addEventListener("DOMContentLoaded", ()=>{
   initLinker();
   initSong();
@@ -1187,5 +1332,13 @@ document.addEventListener("DOMContentLoaded", ()=>{
   loadDraft();
   updatePreview();
   if(window.updateOgpPreview) window.updateOgpPreview();
+  initLinkerAuthWatch();
+  // プレビュー切替（X in-appで押せない対策としてtouchendも）
+  const pt=document.getElementById("previewToggle");
+  if(pt){
+    const tog=(e)=>{ if(e&&e.type==="touchend") e.preventDefault(); const pane=document.getElementById("previewPane"); if(pane) pane.scrollIntoView({behavior:"smooth"}); };
+    pt.addEventListener("click", tog, {passive:false});
+    pt.addEventListener("touchend", tog, {passive:false});
+  }
 });
 setInterval(saveDraft, 1500);
