@@ -125,26 +125,6 @@ async function renderCardOgp({ name, icon, ultimate, oshiMark, lang }) {
 
 app.get("/health", (req, res) => res.json({ ok: true }));
 
-// 一時診断用: フォント導入状態を確認 (確認後に削除可)
-app.get("/debug", (req, res) => {
-  const fs = require("fs");
-  const cp = require("child_process");
-  const out = { home: process.env.HOME || null, cwd: process.cwd(), fontconfig_file: process.env.FONTCONFIG_FILE || null };
-  for (const d of ["/root/.fonts", `${process.env.HOME || ""}/.fonts`, path.join(__dirname, "fonts")]) {
-    try {
-      out[d] = fs.readdirSync(d);
-    } catch (e) {
-      out[d] = `ERR ${e.code || e.message}`;
-    }
-  }
-  try {
-    out.fclist = cp.execSync("fc-list 2>/dev/null | grep -i -E 'rounded|noto|barlow' | head -10 || echo NO_MATCH").toString();
-  } catch (e) {
-    out.fclist = `ERR ${e.message}`;
-  }
-  res.json(out);
-});
-
 app.get("/cardOgp", async (req, res) => {
   try {
     const lang = req.query.lang === "en" ? "en" : "ja";
