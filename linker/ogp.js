@@ -376,13 +376,8 @@ async function updateOgpPreview(){
   const holder=document.getElementById("ogpPreview");
   if(holder && !holder.contains(canvas)){
     holder.innerHTML=""; holder.appendChild(canvas);
-    const dl=document.createElement("a"); dl.id="ogpDownload"; dl.textContent="画像をダウンロード";
-    dl.style.cssText="display:inline-block;margin-top:8px;padding:6px 12px;border-radius:999px;border:1px solid #e5e3f2;background:#fff;font-size:11px;font-weight:700;text-decoration:none;";
-    dl.download="milli-linker-ogp.png"; holder.appendChild(dl);
   }
   await drawOgpToCanvas(canvas, {name, icon, ultimate, oshiMark, shoulderTitle, lang, fontJa, fontEn, xHandle, oshiHistory, favCount, ultimateLogoUrl, siteLogoUrl, qrUrl, talentImgUrl, birthday, birthdayPublic, gallery, _gen: myGen});
-  if(myGen !== ogpDrawGen) return;
-  const dl=document.getElementById("ogpDownload"); if(dl) dl.href=canvas.toDataURL("image/png");
 }
 window.drawOgpToCanvas=drawOgpToCanvas;
 window.updateOgpPreview=updateOgpPreview;
