@@ -1,6 +1,7 @@
 // OGP Business Card — Milli Linker version
 // White bg, oshi color, bigger name/icon/fanName/logos, fanMark as 2 emojis, site = Milli Linker, optional shoulder title
 "use strict";
+function ogpDebounce(fn, ms){ let t=null; return function(...a){ clearTimeout(t); t=setTimeout(()=>fn.apply(this,a), ms); }; }
 const FANMARK_EMOJI = {
   konomi:"🐺🍫", nono:"🎧🤍", akubi:"👿♠︎", koma:"⛩️🔅", raco:"🦦💛", yura:"🌙🫧",
   nuhu:"🌈🖍️", tsukuri:"☁️🔧", liz:"🌂🖤", rei:"🩵🥽", mahoro:"🍓🦌", aoi:"🐢🌱",
@@ -380,4 +381,6 @@ async function updateOgpPreview(){
   await drawOgpToCanvas(canvas, {name, icon, ultimate, oshiMark, shoulderTitle, lang, fontJa, fontEn, xHandle, oshiHistory, favCount, ultimateLogoUrl, siteLogoUrl, qrUrl, talentImgUrl, birthday, birthdayPublic, gallery, _gen: myGen});
 }
 window.drawOgpToCanvas=drawOgpToCanvas;
-window.updateOgpPreview=updateOgpPreview;
+window._updateOgpPreviewRaw=updateOgpPreview;
+window.updateOgpPreview=ogpDebounce(()=>window._updateOgpPreviewRaw(), 180);
+window.updateOgpPreviewImmediate=window._updateOgpPreviewRaw;

@@ -20,6 +20,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700;800&family=M+PLUS+Rounded+1c:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="kit.css">
+<link rel="preload" as="image" href="images/preview.webp" type="image/webp" fetchpriority="high">
+<link rel="preload" as="image" href="images/プレビュー.png" type="image/png" fetchpriority="high">
 <script>try{if(localStorage.getItem("milli-theme")==="dark"||(!localStorage.getItem("milli-theme")&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.dataset.theme="dark";}catch(e){}</script>
 </head>
 <body data-kit-theme="default">
@@ -129,7 +131,10 @@
     <!-- Preview — プレビュー.png のみ -->
     <div class="hero-preview" aria-hidden="true" style="display:grid;place-items:center;">
       <div class="preview-card" style="position:static;transform:rotate(0.6deg);padding:0;overflow:hidden;background:#fff;max-width:520px;width:100%;">
-        <img src="images/プレビュー.png" alt="ホーム画面プレビュー" width="1200" height="630" style="width:100%;height:auto;display:block;">
+        <picture>
+          <source srcset="images/preview.webp" type="image/webp">
+          <img src="images/プレビュー.png" alt="ホーム画面プレビュー" width="1200" height="630" style="width:100%;height:auto;display:block;" loading="eager" fetchpriority="high" decoding="async">
+        </picture>
       </div>
     </div>
   </section>

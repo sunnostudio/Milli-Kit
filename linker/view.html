@@ -257,7 +257,7 @@ async function load(){
   root.innerHTML=`
     <div class="view-card" style="border-top:4px solid ${color}">
       <div class="view-hero">
-        ${talentImg?`<div class="view-hero-bg"><img src="${talentImg}" alt="" onerror="this.style.display='none'"></div>`:""}
+        ${talentImg?`<div class="view-hero-bg"><img src="${talentImg}" alt="" loading="eager" fetchpriority="high" decoding="async" onerror="this.style.display='none'"></div>`:""}
         <div class="view-hero-inner">
           <span class="view-icon">${iconHtml(data.icon)}</span>
           <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0;">

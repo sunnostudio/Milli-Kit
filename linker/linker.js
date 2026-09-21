@@ -43,6 +43,23 @@ const SNS_TYPES = [
   {v:"line", label:"LINE", placeholder:"オープンチャットURL（ID直貼りは非推奨）", pattern:"line"},
   {v:"other", label:"その他", placeholder:"https://...", pattern:"other"},
 ];
+// 軽量化: 入力毎の重いプレビュー再描画をdebounceしてINPを改善（見た目は変わらない）
+function debounce(fn, ms){ let t=null; return function(...a){ clearTimeout(t); t=setTimeout(()=>fn.apply(this,a), ms); }; }
+function scheduleIdle(fn){ if(typeof requestIdleCallback==="function") return requestIdleCallback(fn, {timeout:400}); return setTimeout(fn, 0); }
+let debouncedPreview = null;
+let debouncedOgp = null;
+function getDebouncedPreview(){
+  if(!debouncedPreview){
+    debouncedPreview = debounce(()=>{ updatePreview(); if(window.updateOgpPreview) scheduleIdle(()=>window.updateOgpPreview()); }, 120);
+  }
+  return debouncedPreview;
+}
+function getDebouncedOgp(){
+  if(!debouncedOgp){
+    debouncedOgp = debounce(()=>{ if(window.updateOgpPreview) window.updateOgpPreview(); }, 180);
+  }
+  return debouncedOgp;
+}
 
 function initLinker(){
   renderUltimate();
@@ -151,15 +168,15 @@ function initIcon(){
   presets.forEach(ch=>{
     const b=document.createElement("button");
     b.type="button"; b.className="preset-btn"; b.textContent=ch;
-    b.addEventListener("click", ()=>{ input.value=ch; updateIconPreview(); updatePreview(); });
+    b.addEventListener("click", ()=>{ input.value=ch; updateIconPreview(); getDebouncedPreview()(); saveDraft(); });
     preset.appendChild(b);
   });
-  input.addEventListener("input", ()=>{ updateIconPreview(); updatePreview(); });
+  input.addEventListener("input", ()=>{ updateIconPreview(); getDebouncedPreview()(); saveDraft(); });
   file.addEventListener("change", ()=>{
     const f=file.files[0]; if(!f) return;
     if(f.size>1024*1024){ alert("画像は1MBまでにしてください"); return; }
     const r=new FileReader();
-    r.onload=()=>{ input.value=r.result; updateIconPreview(); updatePreview(); };
+    r.onload=()=>{ input.value=r.result; updateIconPreview(); getDebouncedPreview()(); saveDraft(); };
     r.readAsDataURL(f);
   });
   function updateIconPreview(){
@@ -224,7 +241,7 @@ async function initXField(){
     applyLinked(linked);
   } else {
     wrap.innerHTML=`<div class="kit-input-wrap"><input id="fieldX" class="kit-input" type="text" placeholder="@xxx または https://x.com/xxx"><span class="kit-input-focus"></span></div>`;
-    wrap.querySelector("#fieldX").addEventListener("input", updatePreview);
+    wrap.querySelector("#fieldX").addEventListener("input", ()=>{ getDebouncedPreview()(); saveDraft(); });
   }
   // 非同期でRTDBを再確認（ログイン直後など localStorageが古い場合）
   try{
@@ -286,7 +303,7 @@ function initCustomSelects(){
         valueEl.textContent=opt.textContent;
         root.dataset.value=opt.dataset.value||"";
         root.classList.remove("open");
-        updatePreview();
+        getDebouncedPreview()(); saveDraft();
       });
     });
   });
@@ -325,13 +342,13 @@ function initSns(){
       valEl.textContent=b.textContent; root.dataset.value=b.dataset.value;
       input.placeholder=b.dataset.placeholder||"https://...";
       // adjust input type hint for Discord etc.
-      root.classList.remove("open"); updatePreview(); saveDraft();
+      root.classList.remove("open"); getDebouncedPreview()(); saveDraft();
     }));
-    input.addEventListener("input", ()=>{ updatePreview(); saveDraft(); });
+    input.addEventListener("input", ()=>{ getDebouncedPreview()(); saveDraft(); });
     const memo=row.querySelector(".sns-memo");
     if(pref.type && root){ root.dataset.value=pref.type; }
-    if(memo) memo.addEventListener("input", ()=>{ updatePreview(); saveDraft(); });
-    row.querySelector(".sns-remove").addEventListener("click", ()=>{ row.remove(); updatePreview(); saveDraft(); });
+    if(memo) memo.addEventListener("input", ()=>{ getDebouncedPreview()(); saveDraft(); });
+    row.querySelector(".sns-remove").addEventListener("click", ()=>{ row.remove(); getDebouncedPreview()(); saveDraft(); });
     document.addEventListener("click", ()=> root.classList.remove("open"));
     list.appendChild(row);
   }
@@ -400,30 +417,30 @@ function initKami(){
       const id=extractYoutubeId(v);
       let t=0; try{ const u=new URL(v); t=parseT(u.searchParams.get("t")||u.searchParams.get("start")||u.hash.replace("#t=","")); }catch(e){}
       if(id){
-        const thumb=`https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+        const thumb=`https://img.youtube.com/vi/${id}/mqdefault.jpg`;
         const sec=start.value?parseInt(start.value,10):t;
         if(!start.value && t) start.value=t;
         const youtubeUrl=`https://www.youtube.com/watch?v=${id}`;
         const unishare=`https://milli-unishare.pages.dev/?v=${id}${sec?`&t=${sec}`:""}`;
-        preview.innerHTML=`<img src="${thumb}" alt=""><span><b>${esc(id)}</b> 読み込み中…<br><span style="font-size:11px;color:#6b6a7a">${sec?sec+"秒から":""} · ${esc(unishare)}</span></span>`;
+        preview.innerHTML=`<img src="${thumb}" alt="" loading="lazy" decoding="async"><span><b>${esc(id)}</b> 読み込み中…<br><span style="font-size:11px;color:#6b6a7a">${sec?sec+"秒から":""} · ${esc(unishare)}</span></span>`;
         preview.style.display="flex";
         clearTimeout(fetchTimer);
         fetchTimer=setTimeout(async()=>{
           const info=await fetchOembed(youtubeUrl);
           if(info){
-            preview.innerHTML=`<img src="${escAttr(info.thumb||thumb)}" alt=""><span><b>${esc(info.title)}</b><br><span style="font-size:11px;color:#6b6a7a">${esc(info.author)}${sec?` · ${sec}秒から`:""} · <a href="${escAttr(unishare)}" target="_blank" rel="noopener">Unishareで開く</a></span></span>`;
+            preview.innerHTML=`<img src="${escAttr(info.thumb||thumb)}" alt="" loading="lazy" decoding="async"><span><b>${esc(info.title)}</b><br><span style="font-size:11px;color:#6b6a7a">${esc(info.author)}${sec?` · ${sec}秒から`:""} · <a href="${escAttr(unishare)}" target="_blank" rel="noopener">Unishareで開く</a></span></span>`;
             preview.dataset.title=info.title; preview.dataset.author=info.author; preview.dataset.id=id;
-            updatePreview();
+            getDebouncedPreview()();
           }
         }, 400);
       } else {
         preview.style.display="none";
       }
     }
-    url.addEventListener("input", ()=>{ parse(); updatePreview(); saveDraft(); });
-    start.addEventListener("input", ()=>{ parse(); updatePreview(); saveDraft(); });
-    comment.addEventListener("input", ()=>{ updatePreview(); saveDraft(); });
-    row.querySelector(".media-item-remove").addEventListener("click", ()=>{ row.remove(); refreshIndices(); updatePreview(); saveDraft(); updateAddBtn(); });
+    url.addEventListener("input", ()=>{ parse(); getDebouncedPreview()(); saveDraft(); });
+    start.addEventListener("input", ()=>{ parse(); getDebouncedPreview()(); saveDraft(); });
+    comment.addEventListener("input", ()=>{ getDebouncedPreview()(); saveDraft(); });
+    row.querySelector(".media-item-remove").addEventListener("click", ()=>{ row.remove(); refreshIndices(); getDebouncedPreview()(); saveDraft(); updateAddBtn(); });
     list.appendChild(row);
     if(pref.url) parse();
     refreshIndices(); updateAddBtn();
@@ -458,30 +475,30 @@ function initSong(){
     let fetchTimer=null;
     async function parse(){
       const v=url.value.trim();
-      if(!v){ preview.style.display="none"; preview.dataset.title=""; preview.dataset.author=""; updatePreview(); return; }
+      if(!v){ preview.style.display="none"; preview.dataset.title=""; preview.dataset.author=""; getDebouncedPreview()(); return; }
       const id=extractYoutubeId(v);
       if(id){
-        const thumb=`https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+        const thumb=`https://img.youtube.com/vi/${id}/mqdefault.jpg`;
         const youtubeUrl=`https://www.youtube.com/watch?v=${id}`;
         const millivibe=`https://milli-unishare.pages.dev/millivibe.html?v=${id}`;
-        preview.innerHTML=`<img src="${thumb}" alt=""><span><b>${esc(id)}</b> 読み込み中…<br><span style="font-size:11px;color:#6b6a7a"><a href="${escAttr(millivibe)}" target="_blank" rel="noopener">Millivibeで開く</a></span></span>`;
+        preview.innerHTML=`<img src="${thumb}" alt="" loading="lazy" decoding="async"><span><b>${esc(id)}</b> 読み込み中…<br><span style="font-size:11px;color:#6b6a7a"><a href="${escAttr(millivibe)}" target="_blank" rel="noopener">Millivibeで開く</a></span></span>`;
         preview.style.display="flex";
         clearTimeout(fetchTimer);
         fetchTimer=setTimeout(async()=>{
           const info=await fetchOembed(youtubeUrl);
           if(info){
-            preview.innerHTML=`<img src="${escAttr(info.thumb||thumb)}" alt=""><span><b>${esc(info.title)}</b><br><span style="font-size:11px;color:#6b6a7a">${esc(info.author)} · <a href="${escAttr(millivibe)}" target="_blank" rel="noopener">Millivibeで開く</a></span></span>`;
+            preview.innerHTML=`<img src="${escAttr(info.thumb||thumb)}" alt="" loading="lazy" decoding="async"><span><b>${esc(info.title)}</b><br><span style="font-size:11px;color:#6b6a7a">${esc(info.author)} · <a href="${escAttr(millivibe)}" target="_blank" rel="noopener">Millivibeで開く</a></span></span>`;
             preview.dataset.title=info.title; preview.dataset.author=info.author; preview.dataset.id=id;
-            updatePreview();
+            getDebouncedPreview()();
           }
         }, 400);
       } else {
         preview.style.display="none";
       }
     }
-    url.addEventListener("input", ()=>{ parse(); updatePreview(); saveDraft(); });
-    comment.addEventListener("input", ()=>{ updatePreview(); saveDraft(); });
-    row.querySelector(".media-item-remove").addEventListener("click", ()=>{ row.remove(); refreshIndices(); updatePreview(); saveDraft(); updateAddBtn(); });
+    url.addEventListener("input", ()=>{ parse(); getDebouncedPreview()(); saveDraft(); });
+    comment.addEventListener("input", ()=>{ getDebouncedPreview()(); saveDraft(); });
+    row.querySelector(".media-item-remove").addEventListener("click", ()=>{ row.remove(); refreshIndices(); getDebouncedPreview()(); saveDraft(); updateAddBtn(); });
     list.appendChild(row);
     if(pref.url) parse();
     refreshIndices(); updateAddBtn();
@@ -530,7 +547,7 @@ function initGallery(){
       removeBtn.addEventListener("click", ()=>{
         card.dataset.url="";
         thumb.innerHTML=`<div class="gallery-placeholder">画像<br><span style="font-size:10px;">クリックで選択</span></div><div class="gallery-progress" style="display:none"><div class="gallery-progress-bar"></div></div>`;
-        saveDraft(); updatePreview();
+        saveDraft(); getDebouncedPreview()();
       });
     }
     // click thumb to trigger file
@@ -568,18 +585,17 @@ function initGallery(){
         thumb.querySelector(".gallery-remove").addEventListener("click", ()=>{
           card.dataset.url="";
           thumb.innerHTML=`<div class="gallery-placeholder">画像<br><span style="font-size:10px;">クリックで選択</span></div><div class="gallery-progress" style="display:none"><div class="gallery-progress-bar"></div></div>`;
-          saveDraft(); updatePreview();
+          saveDraft(); getDebouncedPreview()();
         });
         progress.style.display="none";
-        saveDraft(); updatePreview();
-        if(window.updateOgpPreview) window.updateOgpPreview();
+        saveDraft(); getDebouncedPreview()();
       }catch(err){
         progress.style.display="none";
         alert(err.message||"アップロードに失敗しました");
       }
       fileInput.value="";
     });
-    commentInput.addEventListener("input", ()=>{ saveDraft(); updatePreview(); });
+    commentInput.addEventListener("input", ()=>{ saveDraft(); getDebouncedPreview()(); });
     grid.appendChild(card);
   }
   // expose helper to collect
@@ -591,8 +607,8 @@ function initGallery(){
 function bindBirthday(){
   const bday=document.getElementById("fieldBirthday");
   if(bday){
-    bday.addEventListener("input", ()=>{ saveDraft(); updatePreview(); if(window.updateOgpPreview) window.updateOgpPreview(); });
-    bday.addEventListener("change", ()=>{ saveDraft(); updatePreview(); if(window.updateOgpPreview) window.updateOgpPreview(); });
+    bday.addEventListener("input", ()=>{ saveDraft(); getDebouncedPreview()(); });
+    bday.addEventListener("change", ()=>{ saveDraft(); getDebouncedPreview()(); });
   }
   // birthdayPublic is handled by initCustomSelects already (calls updatePreview)
 }
@@ -606,10 +622,10 @@ function bindCounts(){
 function bindPreview(){
   ["fieldName","fieldTitle","fieldIcon","fieldOshiMark","fieldFree"].forEach(id=>{
     const el=document.getElementById(id);
-    if(el) el.addEventListener("input", ()=>{ updatePreview(); if(window.updateOgpPreview) window.updateOgpPreview(); saveDraft(); });
+    if(el) el.addEventListener("input", ()=>{ getDebouncedPreview()(); saveDraft(); });
   });
   updatePreview();
-  if(window.updateOgpPreview) window.updateOgpPreview();
+  scheduleIdle(()=>{ if(window.updateOgpPreview) window.updateOgpPreview(); });
 }
 function isValidXHandleStrict(h){ return /^[A-Za-z0-9_]{1,15}$/.test(h); }
 function snsToUrl(type, raw){
@@ -822,16 +838,16 @@ function updatePreview(){
   let kamiThumbHtml="";
   if(kamiRows.length){
     kamiThumbHtml = kamiRows.map(r=>{
-      const thumb=r.id?`https://img.youtube.com/vi/${r.id}/hqdefault.jpg`:"";
+      const thumb=r.id?`https://img.youtube.com/vi/${r.id}/mqdefault.jpg`:"";
       const comment=esc(r.comment);
       const title=esc(r.title||r.id||r.url);
       const author=esc(r.author||"");
       const start=r.start?`${esc(r.start)}秒から`:"";
       if(r.id && thumb){
         if(r.title){
-          return `<div style="margin-top:8px;border:1px solid #e5e3f2;border-radius:12px;overflow:hidden;"><img src="${thumb}" alt="" style="width:100%;height:78px;object-fit:cover;display:block"><div style="padding:8px;font-size:12px;"><b>${title}</b><br><span style="font-size:11px;color:#6b6a7a;">${author}${start?` · ${start}`:""}</span>${comment?`<div style="margin-top:4px;">${comment}</div>`:""}</div></div>`;
+          return `<div style="margin-top:8px;border:1px solid #e5e3f2;border-radius:12px;overflow:hidden;"><img src="${thumb}" alt="" loading="lazy" decoding="async" style="width:100%;height:78px;object-fit:cover;display:block"><div style="padding:8px;font-size:12px;"><b>${title}</b><br><span style="font-size:11px;color:#6b6a7a;">${author}${start?` · ${start}`:""}</span>${comment?`<div style="margin-top:4px;">${comment}</div>`:""}</div></div>`;
         } else {
-          return `<div style="margin-top:8px;border:1px solid #e5e3f2;border-radius:12px;overflow:hidden;"><img src="${thumb}" alt="" style="width:100%;height:78px;object-fit:cover;display:block"><div style="padding:8px;font-size:12px;">${comment}</div></div>`;
+          return `<div style="margin-top:8px;border:1px solid #e5e3f2;border-radius:12px;overflow:hidden;"><img src="${thumb}" alt="" loading="lazy" decoding="async" style="width:100%;height:78px;object-fit:cover;display:block"><div style="padding:8px;font-size:12px;">${comment}</div></div>`;
         }
       } else {
         return `<div style="margin-top:8px;border:1px solid #e5e3f2;border-radius:12px;overflow:hidden;"><div style="height:48px;background:#f7f5ff;display:grid;place-items:center;font-size:11px;color:#6b6a7a;">${esc(r.url)}</div>${comment?`<div style="padding:8px;font-size:12px;">${comment}</div>`:""}</div>`;
@@ -842,15 +858,15 @@ function updatePreview(){
   let songThumbHtml="";
   if(songRows.length){
     songThumbHtml = songRows.map(r=>{
-      const thumb=r.id?`https://img.youtube.com/vi/${r.id}/hqdefault.jpg`:"";
+      const thumb=r.id?`https://img.youtube.com/vi/${r.id}/mqdefault.jpg`:"";
       const title=esc(r.title||r.id||r.url);
       const author=esc(r.author||"");
       const comment=esc(r.comment||"");
       if(r.id && thumb){
         if(r.title){
-          return `<div style="margin-top:8px;border:1px solid #e5e3f2;border-radius:12px;overflow:hidden;display:flex;gap:8px;align-items:center;padding:6px;background:#f7f5ff;"><img src="${thumb}" alt="" style="width:96px;height:54px;object-fit:cover;border-radius:8px;border:1px solid #e5e3f2"><span style="font-size:12px;"><b>${title}</b><br><span style="font-size:11px;color:#6b6a7a;">${author}</span>${comment?`<br><span style="font-size:11px;">${comment}</span>`:""}</span></div>`;
+          return `<div style="margin-top:8px;border:1px solid #e5e3f2;border-radius:12px;overflow:hidden;display:flex;gap:8px;align-items:center;padding:6px;background:#f7f5ff;"><img src="${thumb}" alt="" loading="lazy" decoding="async" style="width:96px;height:54px;object-fit:cover;border-radius:8px;border:1px solid #e5e3f2"><span style="font-size:12px;"><b>${title}</b><br><span style="font-size:11px;color:#6b6a7a;">${author}</span>${comment?`<br><span style="font-size:11px;">${comment}</span>`:""}</span></div>`;
         } else {
-          return `<div style="margin-top:8px;border:1px solid #e5e3f2;border-radius:12px;overflow:hidden;display:flex;gap:8px;align-items:center;padding:6px;background:#f7f5ff;"><img src="${thumb}" alt=""><span style="font-size:11px;color:#6b6a7a;">${title}${comment?` · ${comment}`:""}</span></div>`;
+          return `<div style="margin-top:8px;border:1px solid #e5e3f2;border-radius:12px;overflow:hidden;display:flex;gap:8px;align-items:center;padding:6px;background:#f7f5ff;"><img src="${thumb}" alt="" loading="lazy" decoding="async"><span style="font-size:11px;color:#6b6a7a;">${title}${comment?` · ${comment}`:""}</span></div>`;
         }
       } else {
         return `<div style="margin-top:8px;padding:8px;border:1px dashed #e5e3f2;border-radius:12px;font-size:12px;">${title}${comment?` — ${comment}`:""}</div>`;
@@ -862,7 +878,7 @@ function updatePreview(){
   if(galleryRows.length){
     galleryHtml = `<div style="margin-top:8px;"><div style="font-size:11px;font-weight:800;color:#6b6a7a;margin-bottom:6px;">画像ギャラリー</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">` + galleryRows.map(g=>{
       const cmt=esc(g.comment||"");
-      return `<div style="border:1px solid #e5e3f2;border-radius:12px;overflow:hidden;background:#fff;"><img src="${escAttr(g.url)}" alt="" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;">${cmt?`<div style="padding:6px;font-size:11px;white-space:pre-wrap;">${cmt}</div>`:""}</div>`;
+      return `<div style="border:1px solid #e5e3f2;border-radius:12px;overflow:hidden;background:#fff;"><img src="${escAttr(g.url)}" alt="" loading="lazy" decoding="async" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;">${cmt?`<div style="padding:6px;font-size:11px;white-space:pre-wrap;">${cmt}</div>`:""}</div>`;
     }).join("") + `</div></div>`;
   }
   const birthdayHtml=birthdayText?`<span style="display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid #e5e3f2;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700;color:#6b6a7a;">${birthdayIconSvg(12)} ${esc(birthdayText)}</span>`:"";
