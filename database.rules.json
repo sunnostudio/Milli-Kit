@@ -1,0 +1,71 @@
+{
+  "rules": {
+    "millipro": {
+      "users": {
+        "$uid": {
+          ".read": "auth != null && auth.uid == $uid",
+          ".write": "auth != null && auth.uid == $uid",
+          "profile": {
+            ".validate": "newData.hasChildren(['playerId'])"
+          },
+          "unishare": {
+            "favs": { ".validate": "newData.isArray() || newData.val() == null" },
+            "notif": { ".validate": true },
+            "cheers": {
+              "$videoId": { ".validate": true }
+            }
+          },
+          "favorites": { ".validate": true },
+          "bookmarks": { ".validate": true }
+        }
+      },
+      "watchEvents": {
+        "$pid": {
+          "$videoId": {
+            "$date": {
+              ".read": true,
+              ".write": true,
+              ".validate": "newData.hasChildren(['watchedAt'])"
+            }
+          }
+        }
+      },
+      "linker": {
+        "$uid": {
+          ".read": true,
+          ".write": "auth != null && auth.uid == $uid",
+          ".validate": "newData.hasChildren(['name', 'ultimate'])",
+          "name": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 20" },
+          "title": { ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 20)" },
+          "icon": { ".validate": "newData.isString() && newData.val().length <= 2000000" },
+          "ultimate": { ".validate": "newData.isString()" },
+          "favs": { ".validate": "newData.isArray() || !newData.exists()" },
+          "kamiRows": { ".validate": "!newData.exists() || newData.hasChildren()" },
+          "songRows": { ".validate": "!newData.exists() || newData.hasChildren()" },
+          "free": { ".validate": "!newData.exists() || newData.isString()" },
+          "oshiHistory": { ".validate": "!newData.exists() || newData.isString()" },
+          "oshiMark": { ".validate": "!newData.exists() || newData.isString()" },
+          "ogpFontJa": { ".validate": "!newData.exists() || newData.isString()" },
+          "ogpFontEn": { ".validate": "!newData.exists() || newData.isString()" },
+          "xUrl": { ".validate": "!newData.exists() || newData.isString()" },
+          "sns": { ".validate": "!newData.exists() || newData.hasChildren()" },
+          "birthday": { ".validate": "!newData.exists() || (newData.isString() && (newData.val() == '' || newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)))" },
+          "birthdayPublic": { ".validate": "!newData.exists() || newData.isString()" },
+          "gallery": {
+            ".validate": "!newData.exists() || newData.hasChildren()",
+            "$idx": { ".validate": "newData.hasChildren(['url'])" }
+          },
+          "updatedAt": { ".validate": "newData.isNumber()" },
+          "$other": { ".validate": true }
+        }
+      },
+      "cards": {
+        "$uid": {
+          ".read": true,
+          ".write": "auth != null && auth.uid == $uid",
+          ".validate": true
+        }
+      }
+    }
+  }
+}

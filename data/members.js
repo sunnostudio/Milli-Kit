@@ -156,16 +156,42 @@ const LINKER_MEMBERS = [
     "hasCursor": false
   },
   {
-    "id": "milchan",
-    "name": "ミリちゃん",
-    "nameEn": "Mil-chan",
-    "gen": "事務所スタッフ・マスコット",
-    "color": "#74a5ae",
-    "subColor": "#e6f4f7",
-    "icon": "images/icon/milchan_profile.JPEG",
-    "img": "images/talents/milchan.JPEG",
-    "logo": null,
-    "cursor": "images/cursors/milli-chan.png",
-    "hasCursor": true
+    "id": "nova",
+    "name": "ミリプロNOVA",
+    "nameEn": "MilliPro NOVA",
+    "gen": "グループ",
+    "color": "#8fb8d9",
+    "subColor": "#e6f2ff",
+    "icon": "images/icon/group/nova.webp",
+    "img": "images/icon/group/nova.webp",
+    "logo": "images/icon/group/nova.webp",
+    "cursor": null,
+    "hasCursor": false
+  },
+  {
+    "id": "uni",
+    "name": "ミリプロUNI",
+    "nameEn": "MilliPro UNI",
+    "gen": "グループ",
+    "color": "#8aa0b0",
+    "subColor": "#e4eef2",
+    "icon": "images/icon/group/uni.webp",
+    "img": "images/icon/group/uni.webp",
+    "logo": "images/icon/group/uni.webp",
+    "cursor": null,
+    "hasCursor": false
+  },
+  {
+    "id": "sona",
+    "name": "ミリプロSONA",
+    "nameEn": "MilliPro SONA",
+    "gen": "グループ",
+    "color": "#c49aad",
+    "subColor": "#f9e6f0",
+    "icon": "images/icon/group/SONA.png",
+    "img": "images/icon/group/SONA.png",
+    "logo": "images/icon/group/SONA.png",
+    "cursor": null,
+    "hasCursor": false
   }
 ];
