@@ -1,6 +1,38 @@
 // Linker — custom UI (no native select/checkbox), official colors
 "use strict";
 
+// NGワード検出 — 必要に応じて追加・編集してください
+const NG_WORDS = [
+  // 例: 差別・誹謗中傷・性的・暴力的な文言など
+  "死ね", "殺す", "バカ", "アホ", "クズ", "きもい", "うざい"
+];
+function findNGWord(text){
+  if(!text) return null;
+  const lower = String(text).toLowerCase();
+  for(const w of NG_WORDS){
+    if(!w) continue;
+    if(lower.includes(String(w).toLowerCase())) return w;
+  }
+  return null;
+}
+function checkNGWords(payload){
+  const fields = [
+    {key:"名前", val: payload.name},
+    {key:"肩書き", val: payload.title},
+    {key:"ひとこと", val: payload.free},
+    {key:"推しマーク", val: payload.oshiMark},
+    ...payload.kamiRows.map((r,i)=> ({key:`神回${i+1}コメント`, val:r.comment})),
+    ...payload.songRows.map((r,i)=> ({key:`好きな曲${i+1}コメント`, val:r.comment})),
+    ...payload.gallery.map((g,i)=> ({key:`ギャラリー${i+1}コメント`, val:g.comment})),
+    ...payload.sns.map((s,i)=> ({key:`SNS${i+1}メモ`, val:s.memo})),
+  ];
+  for(const f of fields){
+    const hit = findNGWord(f.val);
+    if(hit) return {field:f.key, word:hit, val:f.val};
+  }
+  return null;
+}
+
 const SNS_TYPES = [
   {v:"x", label:"X", placeholder:"@xxx または https://x.com/xxx（サブ垢用）", pattern:"x"},
   {v:"youtube", label:"YouTube", placeholder:"https://www.youtube.com/@... や https://youtu.be/...", pattern:"youtube"},
@@ -1102,6 +1134,18 @@ function initSave(){
   function onSave(){
     saveDraft();
     const payload=collectPayload();
+    const ng = checkNGWords(payload);
+    if(ng){
+      alert(`NGワードが含まれています: [${ng.word}]（${ng.field}）\n修正してから再度公開してください。`);
+      // 該当フィールドにフォーカス（ひとこと優先）
+      const map = { "ひとこと":"fieldFree", "肩書き":"fieldTitle", "名前":"fieldName", "推しマーク":"fieldOshiMark" };
+      const id = map[ng.field] || (ng.field.startsWith("神回") ? "kamiList" : ng.field.startsWith("好きな曲") ? "songList" : ng.field.startsWith("ギャラリー") ? "galleryGrid" : ng.field.startsWith("SNS") ? "snsList" : null);
+      if(id){
+        const el=document.getElementById(id);
+        if(el){ el.scrollIntoView({behavior:"smooth", block:"center"}); el.style.outline="2px solid #e74c3c"; setTimeout(()=> el.style.outline="", 2000); }
+      }
+      return;
+    }
     let uid=null;
     try{
       if(typeof firebase!=="undefined" && firebase.auth().currentUser) uid=firebase.auth().currentUser.uid;
