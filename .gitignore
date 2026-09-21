@@ -14,3 +14,5 @@ npm-debug.log*
 # Cloudflare / Render cache
 .wrangler/
 dist/
+server/fonts/
+server/fonts
