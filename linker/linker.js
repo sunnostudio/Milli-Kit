@@ -1054,6 +1054,15 @@ function showShareModal(link, payload){
             <a id="shareXBtn" href="" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;padding:8px 14px;border-radius:999px;background:#111;color:#fff;text-decoration:none;font-weight:800;font-size:12px;">Xで投稿</a>
             <div style="font-size:11px;color:#6b6a7a;margin-top:6px;">OGP画像: <span id="shareOgp" style="word-break:break-all;"></span></div>
           </div>
+          <div style="padding:10px;background:#fff8cc;border:1px solid #f7d640;border-radius:12px;display:flex;gap:8px;align-items:flex-start;">
+            <span style="font-size:16px;flex-shrink:0;">⚠️</span>
+            <div style="font-size:12px;line-height:1.6;color:#5a4a00;">
+              <b>X投稿時の注意</b><br>
+              Xの仕様上、画像や引用を同時に付けると名刺（OGP）が正しく表示されません。<br>
+              まずは<b>「文字＋リンク」のみ</b>で投稿してください。<br>
+              画像や引用を付けたい場合は、その投稿への<b>リプライや引用リポスト</b>で追加してください。
+            </div>
+          </div>
           <div style="text-align:center;">
             <img id="shareQr" alt="QR" width="160" height="160" style="border:1px solid #e5e3f2;border-radius:12px;background:#fff;padding:6px;">
             <div style="font-size:11px;color:#6b6a7a;">QRコード</div>
