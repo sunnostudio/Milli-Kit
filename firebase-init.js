@@ -674,8 +674,9 @@ function mpOpenSignup() {
 
 function mpOpenMypage() {
   mpClose()
-  // 本ポータルでは mypage は account.html（Unishare は mypage.html）
-  location.href = 'account.html'
+  // Milli Kit では mypage.html（旧 Orbis 移植時の account.html 参照を修正）
+  if(location.pathname.includes('/linker/')) location.href = '../mypage.html';
+  else location.href = 'mypage.html';
 }
 
 function mpTogglePw(id) {
