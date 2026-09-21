@@ -135,6 +135,22 @@
       var ti = el.getAttribute("data-i18n-title");
       if (ti) el.setAttribute("title", t(ti));
     });
+    /* placeholder/aria/title の単独指定（data-i18nなしでも置換） */
+    Array.prototype.forEach.call(document.querySelectorAll("[data-i18n-placeholder]"), function (el) {
+      if (el.hasAttribute("data-i18n")) return;
+      var ph = el.getAttribute("data-i18n-placeholder");
+      if (ph && hasKey(ph)) el.setAttribute("placeholder", t(ph));
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-i18n-aria]"), function (el) {
+      if (el.hasAttribute("data-i18n")) return;
+      var aria = el.getAttribute("data-i18n-aria");
+      if (aria && hasKey(aria)) el.setAttribute("aria-label", t(aria));
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-i18n-title]"), function (el) {
+      if (el.hasAttribute("data-i18n")) return;
+      var ti = el.getAttribute("data-i18n-title");
+      if (ti && hasKey(ti)) el.setAttribute("title", t(ti));
+    });
     /* メンバー名リンク・タブ（data-i18n-name="memberId"）の切り替え */
     Array.prototype.forEach.call(document.querySelectorAll("[data-i18n-name]"), function (el) {
       var r = resolveMemberName(el.getAttribute("data-i18n-name"));

@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Milli Linker — 名刺を作る | Milli Kit</title>
-<meta name="description" content="推し・ファンネーム・神回を1枚に。Xで共有できる名刺を作ろう。">
+<title data-i18n="linker.meta.title">Milli Linker — 名刺を作る | Milli Kit</title>
+<meta name="description" content="推し・ファンネーム・神回を1枚に。Xで共有できる名刺を作ろう。" data-i18n-desc="linker.meta.desc">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Milli Kit">
-<meta property="og:title" content="Milli Linker — 名刺を作る">
-<meta property="og:description" content="推し・ファンネーム・神回を1枚の名刺に。Xで共有しよう。">
+<meta property="og:title" content="Milli Linker — 名刺を作る" data-i18n-desc="linker.meta.ogTitle">
+<meta property="og:description" content="推し・ファンネーム・神回を1枚の名刺に。Xで共有しよう。" data-i18n-desc="linker.meta.ogDesc">
 <meta property="og:image" content="https://milli-kit.pages.dev/images/ogp-linker.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://milli-kit.pages.dev/images/ogp-linker.png">
@@ -46,13 +46,13 @@
 <header class="linker-header">
   <a href="../" class="linker-back"><img src="../images/rogo/milli-kit-rogo.png" alt="Milli Kit" width="1526" height="424" style="height:22px;width:auto;display:block;object-fit:contain;"></a>
   <img src="../images/rogo/milli-linker-rogo.png" alt="Milli Linker" width="1408" height="534" style="height:28px;width:auto;display:block;object-fit:contain;">
-  <span class="linker-sub">名刺を作る</span>
+  <span class="linker-sub" data-i18n="linker.sub">名刺を作る</span>
   <div class="linker-header-actions">
-    <button id="langToggle" class="kit-btn ghost" type="button" aria-label="Language" title="Language" style="touch-action:manipulation;">EN</button>
-    <button id="linkerLoginBtn" class="kit-btn ghost" type="button" onclick="if(typeof mpOpen==='function') mpOpen(); else if(typeof kitOpenAccount==='function') kitOpenAccount(); else location.href='../mypage.html';" style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;">ログイン</button>
-    <button id="resetBtn" class="kit-btn ghost" type="button" style="color:#c0392b;border-color:#e5a3b0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">リセット</button>
-    <button id="previewToggle" class="kit-btn ghost" type="button" style="touch-action:manipulation;">プレビュー</button>
-    <button id="saveBtn" class="kit-btn primary" type="button" style="touch-action:manipulation;">公開する</button>
+    <button id="langToggle" class="kit-btn ghost" type="button" aria-label="Language" title="Language" data-i18n="header.lang" style="touch-action:manipulation;">EN</button>
+    <button id="linkerLoginBtn" class="kit-btn ghost" type="button" data-i18n="linker.header.login" onclick="if(typeof mpOpen==='function') mpOpen(); else if(typeof kitOpenAccount==='function') kitOpenAccount(); else location.href='../mypage.html';" style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;">ログイン</button>
+    <button id="resetBtn" class="kit-btn ghost" type="button" data-i18n="linker.header.reset" style="color:#c0392b;border-color:#e5a3b0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">リセット</button>
+    <button id="previewToggle" class="kit-btn ghost" type="button" data-i18n="linker.header.preview" style="touch-action:manipulation;">プレビュー</button>
+    <button id="saveBtn" class="kit-btn primary" type="button" data-i18n="linker.header.publish" style="touch-action:manipulation;">公開する</button>
   </div>
 </header>
 
@@ -61,82 +61,82 @@
   <form id="linkerForm" class="linker-form" onsubmit="return false">
     <!-- 1. 基本情報 -->
     <section class="form-section">
-      <h2 class="form-section-title"><span class="sec-num">1</span> あなたの基本情報</h2>
-      <p class="form-hint">Orbisアカウントと連携すると、名前とアイコンが自動で入ります。</p>
+      <h2 class="form-section-title"><span class="sec-num">1</span> <span data-i18n="linker.section1.title">あなたの基本情報</span></h2>
+      <p class="form-hint" data-i18n="linker.section1.hint">Orbisアカウントと連携すると、名前とアイコンが自動で入ります。</p>
 
       <div class="field">
-        <label class="field-label">表示名 <span class="req">必須</span></label>
+        <label class="field-label"><span data-i18n="linker.field.name.label">表示名</span> <span class="req" data-i18n="linker.field.name.required">必須</span></label>
         <div class="kit-input-wrap">
-          <input id="fieldName" class="kit-input" type="text" maxlength="20" placeholder="例: ミリちゃん" autocomplete="off">
+          <input id="fieldName" class="kit-input" type="text" maxlength="20" placeholder="例: ミリちゃん" data-i18n-placeholder="linker.field.name.placeholder" autocomplete="off">
           <span class="kit-input-focus"></span>
           <span class="kit-input-count"><span id="countName">0</span>/20</span>
         </div>
       </div>
 
       <div class="field">
-        <label class="field-label">肩書 <span style="font-size:10px;background:#e5e3f2;color:#6b6a7a;padding:2px 6px;border-radius:999px;">任意</span></label>
+        <label class="field-label"><span data-i18n="linker.field.title.label">肩書</span> <span style="font-size:10px;background:#e5e3f2;color:#6b6a7a;padding:2px 6px;border-radius:999px;" data-i18n="linker.field.title.optional">任意</span></label>
         <div class="kit-input-wrap">
-          <input id="fieldTitle" class="kit-input" type="text" maxlength="20" placeholder="例: 学生 / 社会人 / 動画編集者" autocomplete="off">
+          <input id="fieldTitle" class="kit-input" type="text" maxlength="20" placeholder="例: 学生 / 社会人 / 動画編集者" data-i18n-placeholder="linker.field.title.placeholder" autocomplete="off">
           <span class="kit-input-focus"></span>
           <span class="kit-input-count"><span id="countTitle">0</span>/20</span>
         </div>
-        <p class="field-note">名前の横に小さく表示されます。OGP名刺にも入ります。</p>
+        <p class="field-note" data-i18n="linker.field.title.note">名前の横に小さく表示されます。OGP名刺にも入ります。</p>
       </div>
 
       <div class="field">
-        <label class="field-label">アイコン</label>
+        <label class="field-label" data-i18n="linker.field.icon.label">アイコン</label>
         <div class="icon-row">
           <span id="iconPreview" class="icon-preview"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#icon-user"/></svg></span>
           <div class="kit-input-wrap" style="flex:1">
-            <input id="fieldIcon" class="kit-input" type="text" placeholder="文字1〜2文字 または 画像URL" autocomplete="off">
+            <input id="fieldIcon" class="kit-input" type="text" placeholder="文字1〜2文字 または 画像URL" data-i18n-placeholder="linker.field.icon.placeholder" autocomplete="off">
             <span class="kit-input-focus"></span>
           </div>
-          <label class="kit-btn ghost small">画像を選ぶ<input id="iconFile" type="file" accept="image/*" hidden></label>
+          <label class="kit-btn ghost small"><span data-i18n="linker.field.icon.choose">画像を選ぶ</span><input id="iconFile" type="file" accept="image/*" hidden></label>
         </div>
         <div id="iconPreset" class="preset-row"></div>
       </div>
 
       <div class="field">
-        <label class="field-label">X（旧Twitter） <span class="req">必須</span></label>
+        <label class="field-label"><span data-i18n="linker.field.x.label">X（旧Twitter）</span> <span class="req" data-i18n="linker.field.x.required">必須</span></label>
         <div id="xFieldWrap"></div>
-        <p class="field-note">連携済みなら自動表示。未連携なら手入力（@やURLを含めてもOK、自動で https://x.com/xxx に整えます）。公式アイコンの𝕏で表示されます。</p>
+        <p class="field-note" data-i18n="linker.field.x.note">連携済みなら自動表示。未連携なら手入力（@やURLを含めてもOK、自動で https://x.com/xxx に整えます）。公式アイコンの𝕏で表示されます。</p>
       </div>
     </section>
 
     <!-- 2. 推し情報 -->
     <section class="form-section">
-      <h2 class="form-section-title"><span class="sec-num">2</span> 推し情報</h2>
-      <p class="form-hint">ファンネーム・ファンマークは推しを選ぶと自動で付きます。最推しは大きく、他は「/」で並びます。</p>
+      <h2 class="form-section-title"><span class="sec-num">2</span> <span data-i18n="linker.section2.title">推し情報</span></h2>
+      <p class="form-hint" data-i18n="linker.section2.hint">ファンネーム・ファンマークは推しを選ぶと自動で付きます。最推しは大きく、他は「/」で並びます。</p>
 
       <div class="field">
-        <label class="field-label">最推し <span class="req">必須</span>（1人）</label>
+        <label class="field-label"><span data-i18n="linker.field.oshiUltimate.label">最推し</span> <span class="req" data-i18n="linker.field.name.required">必須</span><span data-i18n="linker.field.oshiUltimate.suffix">（1人）</span></label>
         <div id="oshiUltimate" class="custom-radio-grid"></div>
       </div>
 
       <div class="field">
-        <label class="field-label">推し（複数可）</label>
+        <label class="field-label" data-i18n="linker.field.oshiFavs.label">推し（複数可）</label>
         <div id="oshiFavs" class="custom-check-grid"></div>
       </div>
 
       <div class="field grid2">
         <div>
-          <label class="field-label">推し歴</label>
+          <label class="field-label" data-i18n="linker.field.oshiHistory.label">推し歴</label>
           <div class="custom-select" data-name="oshiHistory">
-            <button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false"><span class="custom-select-value">選択してください</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9l6 6 6-6"/></svg></button>
+            <button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false"><span class="custom-select-value" data-i18n="linker.field.oshiHistory.placeholder">選択してください</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9l6 6 6-6"/></svg></button>
             <div class="custom-select-menu" role="listbox">
-              <button type="button" role="option" data-value="">未選択</button>
-              <button type="button" role="option" data-value="半年未満">半年未満</button>
-              <button type="button" role="option" data-value="半年〜1年">半年〜1年</button>
-              <button type="button" role="option" data-value="1年">1年</button>
-              <button type="button" role="option" data-value="2年">2年</button>
-              <button type="button" role="option" data-value="3年以上">3年以上</button>
+              <button type="button" role="option" data-value="" data-i18n="linker.field.oshiHistory.option.none">未選択</button>
+              <button type="button" role="option" data-value="半年未満" data-i18n="linker.field.oshiHistory.option.halfYear">半年未満</button>
+              <button type="button" role="option" data-value="半年〜1年" data-i18n="linker.field.oshiHistory.option.halfToYear">半年〜1年</button>
+              <button type="button" role="option" data-value="1年" data-i18n="linker.field.oshiHistory.option.oneYear">1年</button>
+              <button type="button" role="option" data-value="2年" data-i18n="linker.field.oshiHistory.option.twoYears">2年</button>
+              <button type="button" role="option" data-value="3年以上" data-i18n="linker.field.oshiHistory.option.threePlus">3年以上</button>
             </div>
           </div>
         </div>
         <div>
-          <label class="field-label">推しマーク（任意）</label>
+          <label class="field-label" data-i18n="linker.field.oshiMark.label">推しマーク（任意）</label>
           <div class="kit-input-wrap">
-            <input id="fieldOshiMark" class="kit-input" type="text" maxlength="4" placeholder="例: ❄️🦖">
+            <input id="fieldOshiMark" class="kit-input" type="text" maxlength="4" placeholder="例: ❄️🦖" data-i18n-placeholder="linker.field.oshiMark.placeholder">
             <span class="kit-input-focus"></span>
           </div>
         </div>
@@ -145,142 +145,142 @@
 
     <!-- 2b. 誕生日（任意） -->
     <section class="form-section">
-      <h2 class="form-section-title"><span class="sec-num">2.5</span> 誕生日 <span style="font-size:10px;background:#e5e3f2;color:#6b6a7a;padding:2px 6px;border-radius:999px;">任意</span></h2>
-      <p class="form-hint">OGPやプロフィールに表示できます。公開範囲を選べます。</p>
+      <h2 class="form-section-title"><span class="sec-num">2.5</span> <span data-i18n="linker.section2b.title">誕生日</span> <span style="font-size:10px;background:#e5e3f2;color:#6b6a7a;padding:2px 6px;border-radius:999px;" data-i18n="linker.section2b.optional">任意</span></h2>
+      <p class="form-hint" data-i18n="linker.section2b.hint">OGPやプロフィールに表示できます。公開範囲を選べます。</p>
       <div class="field grid2">
         <div>
-          <label class="field-label">誕生日</label>
+          <label class="field-label" data-i18n="linker.field.birthday.label">誕生日</label>
           <div class="kit-input-wrap">
             <input id="fieldBirthday" class="kit-input" type="date" autocomplete="bday">
             <span class="kit-input-focus"></span>
           </div>
         </div>
         <div>
-          <label class="field-label">公開範囲</label>
+          <label class="field-label" data-i18n="linker.field.birthdayVisibility.label">公開範囲</label>
           <div class="custom-select" data-name="birthdayPublic">
-            <button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false"><span class="custom-select-value">月日のみ公開</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9l6 6 6-6"/></svg></button>
+            <button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false"><span class="custom-select-value" data-i18n="linker.field.birthdayVisibility.option.monthDay">月日のみ公開</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9l6 6 6-6"/></svg></button>
             <div class="custom-select-menu" role="listbox">
-              <button type="button" role="option" data-value="monthDay">月日のみ公開</button>
-              <button type="button" role="option" data-value="full">年月日を公開</button>
-              <button type="button" role="option" data-value="hidden">非公開</button>
+              <button type="button" role="option" data-value="monthDay" data-i18n="linker.field.birthdayVisibility.option.monthDay">月日のみ公開</button>
+              <button type="button" role="option" data-value="full" data-i18n="linker.field.birthdayVisibility.option.full">年月日を公開</button>
+              <button type="button" role="option" data-value="hidden" data-i18n="linker.field.birthdayVisibility.option.hidden">非公開</button>
             </div>
           </div>
         </div>
       </div>
-      <p class="field-note">「月日のみ公開」なら年は表示されません。非公開にすると誰にも表示されません。</p>
+      <p class="field-note" data-i18n="linker.field.birthday.note">「月日のみ公開」なら年は表示されません。非公開にすると誰にも表示されません。</p>
     </section>
 
     <!-- 3. 神回 -->
     <section class="form-section">
-      <h2 class="form-section-title"><span class="sec-num">3</span> 神回（好きな動画） <span class="req">必須</span> <span style="font-size:11px;color:#6b6a7a;font-weight:700;">1〜6件</span></h2>
-      <p class="form-hint">YouTube URLを貼るとタイトルとチャンネルが自動で表示されます。開始秒数は?t=を含めて貼り付けても自動で入ります。</p>
+      <h2 class="form-section-title"><span class="sec-num">3</span> <span data-i18n="linker.section3.title">神回（好きな動画）</span> <span class="req" data-i18n="linker.section3.required">必須</span> <span style="font-size:11px;color:#6b6a7a;font-weight:700;" data-i18n="linker.section3.count">1〜6件</span></h2>
+      <p class="form-hint" data-i18n="linker.section3.hint">YouTube URLを貼るとタイトルとチャンネルが自動で表示されます。開始秒数は?t=を含めて貼り付けても自動で入ります。</p>
       <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
-        <a href="https://www.youtube.com/" target="_blank" rel="noopener" class="kit-btn ghost small">YouTubeで探す <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#icon-external"/></svg></a>
-        <a href="https://milli-unishare.pages.dev/" target="_blank" rel="noopener" class="kit-btn ghost small">Milli Unishareで探す <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#icon-external"/></svg></a>
+        <a href="https://www.youtube.com/" target="_blank" rel="noopener" class="kit-btn ghost small"><span data-i18n="linker.button.searchYoutube">YouTubeで探す</span> <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#icon-external"/></svg></a>
+        <a href="https://milli-unishare.pages.dev/" target="_blank" rel="noopener" class="kit-btn ghost small"><span data-i18n="linker.button.searchUnishare">Milli Unishareで探す</span> <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#icon-external"/></svg></a>
       </div>
       <div id="kamiList" class="media-list"></div>
-      <button type="button" id="addKamiBtn" class="kit-btn ghost small"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#icon-plus"/></svg> 追加（最大6件）</button>
-      <p class="field-note">保存時はUnishare経由のURLに変換されます。</p>
+      <button type="button" id="addKamiBtn" class="kit-btn ghost small"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#icon-plus"/></svg> <span data-i18n="linker.button.addKami">追加（最大6件）</span></button>
+      <p class="field-note" data-i18n="linker.field.kami.note">保存時はUnishare経由のURLに変換されます。</p>
     </section>
 
     <!-- 4. 好きな曲 -->
     <section class="form-section">
-      <h2 class="form-section-title"><span class="sec-num">4</span> 好きな曲 <span style="font-size:11px;color:#6b6a7a;font-weight:700;">1〜6件</span></h2>
-      <p class="form-hint">動画IDだけでもOK。サムネ・タイトル・チャンネルが自動で表示されます。</p>
+      <h2 class="form-section-title"><span class="sec-num">4</span> <span data-i18n="linker.section4.title">好きな曲</span> <span style="font-size:11px;color:#6b6a7a;font-weight:700;" data-i18n="linker.section4.count">1〜6件</span></h2>
+      <p class="form-hint" data-i18n="linker.section4.hint">動画IDだけでもOK。サムネ・タイトル・チャンネルが自動で表示されます。</p>
       <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
-        <a href="https://www.youtube.com/" target="_blank" rel="noopener" class="kit-btn ghost small">YouTubeで探す <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#icon-external"/></svg></a>
-        <a href="https://milli-unishare.pages.dev/" target="_blank" rel="noopener" class="kit-btn ghost small">Milli Unishareで探す <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#icon-external"/></svg></a>
-        <a href="https://milli-unishare.pages.dev/millivibe.html" target="_blank" rel="noopener" class="kit-btn ghost small">Millivibeで探す <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#icon-external"/></svg></a>
+        <a href="https://www.youtube.com/" target="_blank" rel="noopener" class="kit-btn ghost small"><span data-i18n="linker.button.searchYoutube">YouTubeで探す</span> <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#icon-external"/></svg></a>
+        <a href="https://milli-unishare.pages.dev/" target="_blank" rel="noopener" class="kit-btn ghost small"><span data-i18n="linker.button.searchUnishare">Milli Unishareで探す</span> <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#icon-external"/></svg></a>
+        <a href="https://milli-unishare.pages.dev/millivibe.html" target="_blank" rel="noopener" class="kit-btn ghost small"><span data-i18n="linker.button.searchMillivibe">Millivibeで探す</span> <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#icon-external"/></svg></a>
       </div>
       <div id="songList" class="media-list"></div>
-      <button type="button" id="addSongBtn" class="kit-btn ghost small"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#icon-plus"/></svg> 追加（最大6件）</button>
+      <button type="button" id="addSongBtn" class="kit-btn ghost small"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#icon-plus"/></svg> <span data-i18n="linker.button.addSong">追加（最大6件）</span></button>
     </section>
 
     <!-- 5. SNS -->
     <section class="form-section">
-      <h2 class="form-section-title"><span class="sec-num">5</span> SNSリンク</h2>
-      <p class="form-hint">Xのサブ垢も追加可。YouTube / Discord / Instagram / TikTok / Wick / LINEなどを追加できます。各行にメモ（例: サブ垢・告知用）を付けられます。</p>
+      <h2 class="form-section-title"><span class="sec-num">5</span> <span data-i18n="linker.section5.title">SNSリンク</span></h2>
+      <p class="form-hint" data-i18n="linker.section5.hint">Xのサブ垢も追加可。YouTube / Discord / Instagram / TikTok / Wick / LINEなどを追加できます。各行にメモ（例: サブ垢・告知用）を付けられます。</p>
       <div id="snsList" class="sns-list"></div>
-      <button type="button" id="addSnsBtn" class="kit-btn ghost small"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#icon-plus"/></svg> 追加</button>
-      <p class="field-note">LINEはID公開ではなく、オープンチャット等のURLを推奨します。</p>
+      <button type="button" id="addSnsBtn" class="kit-btn ghost small"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><use href="#icon-plus"/></svg> <span data-i18n="linker.button.addSns">追加</span></button>
+      <p class="field-note" data-i18n="linker.field.sns.note">LINEはID公開ではなく、オープンチャット等のURLを推奨します。</p>
     </section>
 
     <!-- 6. フリースペース -->
     <section class="form-section">
-      <h2 class="form-section-title"><span class="sec-num">6</span> フリースペース</h2>
+      <h2 class="form-section-title"><span class="sec-num">6</span> <span data-i18n="linker.section6.title">フリースペース</span></h2>
       <div class="field">
-        <label class="field-label">ひとこと</label>
+        <label class="field-label" data-i18n="linker.field.free.label">ひとこと</label>
         <div class="kit-input-wrap textarea">
-          <textarea id="fieldFree" class="kit-input" rows="4" maxlength="200" placeholder="例: ゆらふぃらとお話ししたいです！神回布教待ってます。"></textarea>
+          <textarea id="fieldFree" class="kit-input" rows="4" maxlength="200" placeholder="例: ゆらふぃらとお話ししたいです！神回布教待ってます。" data-i18n-placeholder="linker.field.free.placeholder"></textarea>
           <span class="kit-input-focus"></span>
           <span class="kit-input-count"><span id="countFree">0</span>/200</span>
         </div>
-        <p class="field-note">200文字まで。NGワードは保存時にチェックされます。</p>
+        <p class="field-note" data-i18n="linker.field.free.note">200文字まで。NGワードは保存時にチェックされます。</p>
       </div>
     </section>
 
     <!-- 7. 画像ギャラリー（任意 6枚） -->
     <section class="form-section">
-      <h2 class="form-section-title"><span class="sec-num">7</span> 画像ギャラリー <span style="font-size:10px;background:#e5e3f2;color:#6b6a7a;padding:2px 6px;border-radius:999px;">任意</span> <span style="font-size:11px;color:#6b6a7a;font-weight:700;">0〜6枚</span></h2>
-      <p class="form-hint">ファンアート・イベント写真・推しの好きな瞬間など、あなたの「好き」を6枚まで紹介できます。Cloudinaryにアップロードされます。</p>
+      <h2 class="form-section-title"><span class="sec-num">7</span> <span data-i18n="linker.section7.title">画像ギャラリー</span> <span style="font-size:10px;background:#e5e3f2;color:#6b6a7a;padding:2px 6px;border-radius:999px;" data-i18n="linker.section7.optional">任意</span> <span style="font-size:11px;color:#6b6a7a;font-weight:700;" data-i18n="linker.section7.count">0〜6枚</span></h2>
+      <p class="form-hint" data-i18n="linker.section7.hint">ファンアート・イベント写真・推しの好きな瞬間など、あなたの「好き」を6枚まで紹介できます。Cloudinaryにアップロードされます。</p>
       <div id="galleryGrid" class="gallery-grid"></div>
-      <p class="field-note">対応: JPG/PNG/WebP, 5MBまで。アップロード後にひとことを添えられます。Cloudinary未設定時は一時的にブラウザ内プレビューのみ表示されます。</p>
-      <p id="galleryCloudinaryNote" class="field-note" style="display:none;color:#c0392b;">Cloudinary未設定のため画像はブラウザ内のみで保存されます（共有時に表示されません）。<code>cloudinary-config.js</code> を設定してください。</p>
+      <p class="field-note" data-i18n="linker.field.gallery.note">対応: JPG/PNG/WebP, 5MBまで。アップロード後にひとことを添えられます。Cloudinary未設定時は一時的にブラウザ内プレビューのみ表示されます。</p>
+      <p id="galleryCloudinaryNote" class="field-note" style="display:none;color:#c0392b;" data-i18n="linker.field.gallery.cloudinaryNote" data-i18n-html>Cloudinary未設定のため画像はブラウザ内のみで保存されます（共有時に表示されません）。<code>cloudinary-config.js</code> を設定してください。</p>
     </section>
 
     <!-- 8. 名刺のフォント -->
     <section class="form-section">
-      <h2 class="form-section-title"><span class="sec-num">8</span> 名刺のフォント</h2>
-      <p class="form-hint">日英でそれぞれフォントを選べます。プレビューで確認してください。</p>
+      <h2 class="form-section-title"><span class="sec-num">8</span> <span data-i18n="linker.section8.title">名刺のフォント</span></h2>
+      <p class="form-hint" data-i18n="linker.section8.hint">日英でそれぞれフォントを選べます。プレビューで確認してください。</p>
       <div class="field grid2">
         <div>
-          <label class="field-label">日本語フォント</label>
+          <label class="field-label" data-i18n="linker.field.fontJa.label">日本語フォント</label>
           <div class="custom-select" data-name="ogpFontJa">
-            <button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false"><span class="custom-select-value">M PLUS Rounded 1c（丸ゴシック）</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9l6 6 6-6"/></svg></button>
+            <button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false"><span class="custom-select-value" data-i18n="linker.field.fontJa.option.rounded">M PLUS Rounded 1c（丸ゴシック）</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9l6 6 6-6"/></svg></button>
             <div class="custom-select-menu" role="listbox">
-              <button type="button" role="option" data-value="'M PLUS Rounded 1c','Noto Sans JP',sans-serif">M PLUS Rounded 1c（丸ゴシック）</button>
-              <button type="button" role="option" data-value="'Noto Sans JP',sans-serif">Noto Sans JP（ゴシック）</button>
-              <button type="button" role="option" data-value="'Noto Serif JP',serif">Noto Serif JP（明朝）</button>
+              <button type="button" role="option" data-value="'M PLUS Rounded 1c','Noto Sans JP',sans-serif" data-i18n="linker.field.fontJa.option.rounded">M PLUS Rounded 1c（丸ゴシック）</button>
+              <button type="button" role="option" data-value="'Noto Sans JP',sans-serif" data-i18n="linker.field.fontJa.option.sans">Noto Sans JP（ゴシック）</button>
+              <button type="button" role="option" data-value="'Noto Serif JP',serif" data-i18n="linker.field.fontJa.option.serif">Noto Serif JP（明朝）</button>
             </div>
           </div>
         </div>
         <div>
-          <label class="field-label">英語フォント</label>
+          <label class="field-label" data-i18n="linker.field.fontEn.label">英語フォント</label>
           <div class="custom-select" data-name="ogpFontEn">
-            <button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false"><span class="custom-select-value">Barlow（ゴシック）</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9l6 6 6-6"/></svg></button>
+            <button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false"><span class="custom-select-value" data-i18n="linker.field.fontEn.option.barlow">Barlow（ゴシック）</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9l6 6 6-6"/></svg></button>
             <div class="custom-select-menu" role="listbox">
-              <button type="button" role="option" data-value="'Barlow',sans-serif">Barlow（ゴシック）</button>
-              <button type="button" role="option" data-value="'Dancing Script',cursive">Dancing Script（筆記体）</button>
-              <button type="button" role="option" data-value="'M PLUS Rounded 1c','Noto Sans JP',sans-serif">M PLUS Rounded 1c</button>
-              <button type="button" role="option" data-value="'Noto Sans JP',sans-serif">Noto Sans JP</button>
+              <button type="button" role="option" data-value="'Barlow',sans-serif" data-i18n="linker.field.fontEn.option.barlow">Barlow（ゴシック）</button>
+              <button type="button" role="option" data-value="'Dancing Script',cursive" data-i18n="linker.field.fontEn.option.dancing">Dancing Script（筆記体）</button>
+              <button type="button" role="option" data-value="'M PLUS Rounded 1c','Noto Sans JP',sans-serif" data-i18n="linker.field.fontEn.option.rounded2">M PLUS Rounded 1c</button>
+              <button type="button" role="option" data-value="'Noto Sans JP',sans-serif" data-i18n="linker.field.fontEn.option.sans2">Noto Sans JP</button>
             </div>
           </div>
         </div>
       </div>
-      <p class="field-note">日本語は名前が日本語の時に、英語は英語名の時に使われます。サイズは自動で調整されます。</p>
+      <p class="field-note" data-i18n="linker.field.fontEn.note">日本語は名前が日本語の時に、英語は英語名の時に使われます。サイズは自動で調整されます。</p>
     </section>
 
     <div class="form-actions">
-      <button type="button" id="saveBtn2" class="kit-btn primary large">公開する</button>
-      <p class="field-note" style="text-align:center">公開すると、プロフィール上部のSNSアイコンと、閲覧者の推しカラーで染まるUIが反映されます。</p>
-      <p class="field-note" style="text-align:center">「公開する」を押すと、<a href="../legal.html">利用規約</a>・<a href="../privacy.html">プライバシーポリシー</a>およびミリプロ公式<a href="https://milpr.com/guideline" target="_blank" rel="noopener">ガイドライン</a>に同意したことになります。</p>
+      <button type="button" id="saveBtn2" class="kit-btn primary large" data-i18n="linker.form.publish">公開する</button>
+      <p class="field-note" style="text-align:center" data-i18n="linker.form.publishNote1">公開すると、プロフィール上部のSNSアイコンと、閲覧者の推しカラーで染まるUIが反映されます。</p>
+      <p class="field-note" style="text-align:center" data-i18n="linker.form.publishNoteTos" data-i18n-html>「公開する」を押すと、<a href="../legal.html">利用規約</a>・<a href="../privacy.html">プライバシーポリシー</a>およびミリプロ公式<a href="https://milpr.com/guideline" target="_blank" rel="noopener">ガイドライン</a>に同意したことになります。</p>
       <p id="saveHint" class="field-note" style="text-align:center"></p>
     </div>
 
     <footer class="kit-footer">
-      <p class="footer-note">本サイトはファンが運営する非公式サイトです。ミリプロ公式とは一切関係ありません。</p>
-      <p class="footer-note"><a href="../legal.html">利用規約</a>・<a href="../privacy.html">プライバシーポリシー</a> ／ 公式: <a href="https://milpr.com/" target="_blank" rel="noopener">https://milpr.com/</a></p>
-      <p class="footer-copy">© 2026 Milli Kit</p>
+      <p class="footer-note" data-i18n="linker.footer.disclaimer">本サイトはファンが運営する非公式サイトです。ミリプロ公式とは一切関係ありません。</p>
+      <p class="footer-note" data-i18n="linker.footer.links" data-i18n-html><a href="../legal.html">利用規約</a>・<a href="../privacy.html">プライバシーポリシー</a> ／ 公式: <a href="https://milpr.com/" target="_blank" rel="noopener">https://milpr.com/</a></p>
+      <p class="footer-copy" data-i18n="linker.footer.copy">© 2026 Milli Kit</p>
     </footer>
   </form>
 
   <!-- Right: preview -->
   <aside id="previewPane" class="linker-preview">
     <div class="preview-sticky">
-      <h3 class="preview-title">プレビュー</h3>
+      <h3 class="preview-title" data-i18n="linker.preview.title">プレビュー</h3>
       <div id="cardPreview" class="card-preview"></div>
       <div id="ogpPreview" class="ogp-preview"></div>
-      <p class="field-note">左で入力すると、こちらにリアルタイムで反映されます。名刺OGPは1200×630で生成されます。</p>
+      <p class="field-note" data-i18n="linker.preview.note">左で入力すると、こちらにリアルタイムで反映されます。名刺OGPは1200×630で生成されます。</p>
     </div>
   </aside>
 </main>
@@ -301,7 +301,7 @@
 <!-- Account modals (for login required on publish — same as top page) -->
 <div id="acctModal" class="acct-overlay" aria-hidden="true">
   <div class="acct-box">
-    <button class="acct-close" data-close="acctModal" aria-label="閉じる"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <button class="acct-close" data-close="acctModal" aria-label="閉じる" data-i18n-aria="linker.modal.close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     <h3 class="acct-title"><svg width="18" height="18" aria-hidden="true"><use href="#icon-link"/></svg> Milli Orbisアカウント連携</h3>
     <div class="acct-body">
       <p class="acct-hint">Milli Orbisアカウントでログインすると、Milli Linkerで作成した名刺をクラウドに保存し、Xで共有できる公開リンクが発行されます。未ログインのまま公開しても他人には表示されません。</p>
@@ -420,15 +420,15 @@
 <!-- Login required modal (linker-specific) -->
 <div id="loginRequiredModal" class="acct-overlay" aria-hidden="true">
   <div class="acct-box" style="max-width:460px;">
-    <button class="acct-close" onclick="document.getElementById('loginRequiredModal').classList.remove('open')" aria-label="閉じる"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    <h3>ログインが必要です</h3>
+    <button class="acct-close" onclick="document.getElementById('loginRequiredModal').classList.remove('open')" aria-label="閉じる" data-i18n-aria="linker.modal.close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h3 data-i18n="linker.modal.loginRequiredTitle">ログインが必要です</h3>
     <div style="padding:0 22px 18px;">
-      <p class="acct-hint" style="margin-bottom:12px;">名刺を公開して共有リンクを発行するにはログインが必要です。<br>未ログインのまま「公開する」を押しても、リンクはあなたの端末だけで見られる <code>?local=1</code> になり、他人には表示されません。Xに投稿しても意味のないリンクになります。</p>
+      <p class="acct-hint" style="margin-bottom:12px;" data-i18n="linker.modal.loginRequiredDesc" data-i18n-html>名刺を公開して共有リンクを発行するにはログインが必要です。<br>未ログインのまま「公開する」を押しても、リンクはあなたの端末だけで見られる <code>?local=1</code> になり、他人には表示されません。Xに投稿しても意味のないリンクになります。</p>
       <div class="acct-row">
-        <button type="button" onclick="document.getElementById('loginRequiredModal').classList.remove('open'); if(typeof mpOpenLogin==='function') mpOpenLogin(); else if(typeof mpOpen==='function') mpOpen();">ログインする</button>
-        <button type="button" onclick="document.getElementById('loginRequiredModal').classList.remove('open')" style="background:#fff;color:#222;border:1px solid var(--border);">閉じる</button>
+        <button type="button" onclick="document.getElementById('loginRequiredModal').classList.remove('open'); if(typeof mpOpenLogin==='function') mpOpenLogin(); else if(typeof mpOpen==='function') mpOpen();" data-i18n="linker.modal.loginRequiredLogin">ログインする</button>
+        <button type="button" onclick="document.getElementById('loginRequiredModal').classList.remove('open')" style="background:#fff;color:#222;border:1px solid var(--border);" data-i18n="linker.modal.loginRequiredClose">閉じる</button>
       </div>
-      <p class="acct-hint" style="margin-top:10px;text-align:center;">すでにアカウントをお持ちでない場合は新規登録も選べます。</p>
+      <p class="acct-hint" style="margin-top:10px;text-align:center;" data-i18n="linker.modal.loginRequiredHint">すでにアカウントをお持ちでない場合は新規登録も選べます。</p>
     </div>
   </div>
 </div>
@@ -436,13 +436,13 @@
 <!-- Reset confirm modal (X in-app fallback for confirm) -->
 <div id="resetConfirmModal" class="acct-overlay" aria-hidden="true">
   <div class="acct-box" style="max-width:400px;">
-    <button class="acct-close" onclick="document.getElementById('resetConfirmModal').classList.remove('open')" aria-label="閉じる"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    <h3>リセットしますか？</h3>
+    <button class="acct-close" onclick="document.getElementById('resetConfirmModal').classList.remove('open')" aria-label="閉じる" data-i18n-aria="linker.modal.close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h3 data-i18n="linker.modal.resetTitle">リセットしますか？</h3>
     <div style="padding:0 22px 18px;">
-      <p class="acct-hint" style="margin-bottom:12px;">入力内容と保存された下書きが全て削除されます。元に戻せません。</p>
+      <p class="acct-hint" style="margin-bottom:12px;" data-i18n="linker.modal.resetHint">入力内容と保存された下書きが全て削除されます。元に戻せません。</p>
       <div class="acct-row">
-        <button type="button" onclick="document.getElementById('resetConfirmModal').classList.remove('open'); if(typeof doResetAll==='function') doResetAll();" style="background:#c0392b;color:#fff;border-color:#c0392b;">リセットする</button>
-        <button type="button" onclick="document.getElementById('resetConfirmModal').classList.remove('open')" style="background:#fff;color:#222;border:1px solid var(--border);">キャンセル</button>
+        <button type="button" onclick="document.getElementById('resetConfirmModal').classList.remove('open'); if(typeof doResetAll==='function') doResetAll();" style="background:#c0392b;color:#fff;border-color:#c0392b;" data-i18n="linker.modal.resetConfirm">リセットする</button>
+        <button type="button" onclick="document.getElementById('resetConfirmModal').classList.remove('open')" style="background:#fff;color:#222;border:1px solid var(--border);" data-i18n="linker.modal.resetCancel">キャンセル</button>
       </div>
     </div>
   </div>
