@@ -338,7 +338,7 @@ async function drawOgpToCanvas(canvas, opts){
     ctx.strokeStyle="#e5e3f2"; ctx.lineWidth=1; roundRect(ctx,qx-6,qy-6,qs+12,qs+12,10); ctx.stroke();
     ctx.drawImage(qrImg, qx, qy, qs, qs);
   }
-  ctx.fillStyle="#c8c6de"; ctx.font=`600 10px ${fontJa}`; ctx.textAlign="right"; ctx.fillText("1200×630", W-28, H-14); ctx.textAlign="left";
+  ctx.fillStyle="#c8c6de"; ctx.font=`600 10px ${fontJa}`; ctx.textAlign="right"; ctx.fillText("非公式ファンメイド", W-28, H-14); ctx.textAlign="left";
 }
 function roundRect(ctx,x,y,w,h,r){
   ctx.beginPath(); ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r); ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h); ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r); ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();

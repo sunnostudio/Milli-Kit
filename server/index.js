@@ -110,7 +110,7 @@ async function renderCardOgp({ name, icon, ultimate, oshiMark, lang }) {
     `<text x="232" y="215" font-family="${isEn ? fEn : fJa}" font-size="${isEn ? 26 : 28}" font-weight="700" fill="#6b6a7a">${escXml(fanName)}${oshiMark ? ` ${escXml(oshiMark)}` : ""}</text>` +
     (m ? `<g><rect x="232" y="238" rx="14" ry="14" width="${badgeW}" height="28" fill="${color}"/>` +
       `<text x="246" y="257" font-family="${isEn ? fEn : fJa}" font-size="${isEn ? 18 : 19}" font-weight="800" fill="#fff">${escXml(badgeText)}</text></g>` : "") +
-    `<text x="64" y="${H - 28}" font-family="${fJa}" font-size="13" font-weight="700" fill="#a8a3c0">Milli Kit  •  Milli Linker</text>` +
+    `<text x="64" y="${H - 28}" font-family="${fJa}" font-size="13" font-weight="700" fill="#a8a3c0">Milli Kit  •  Milli Linker  •  非公式ファンメイド</text>` +
     `<text x="${W - 28}" y="${H - 28}" font-family="${fJa}" font-size="10" font-weight="600" fill="#c8c6de" text-anchor="end">1200×630</text>` +
     `</svg>`;
 
