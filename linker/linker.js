@@ -1051,7 +1051,7 @@ function showShareModal(link, payload){
   linkEl.href=link; linkEl.textContent=link; viewEl.href=link;
   const mShare = (typeof LINKER_MEMBERS!=="undefined"?LINKER_MEMBERS.find(x=>x.id===payload.ultimate):null) || (typeof MEMBERS!=="undefined"?MEMBERS.find(x=>x.id===payload.ultimate):null);
   const oshiNameShare = mShare ? mShare.name : (payload.ultimate||"");
-  const xTextStr=`${payload.name||"私"}のMilli Linker名刺 — 最推し ${oshiNameShare} ${link} #ミリプロ #MilliKit #MilliLinker`;
+  const xTextStr=`[${payload.name||"私"}のMilli Linker名刺 — 最推し ${oshiNameShare}] ${link} #ミリプロ好きと繋がりたい #MilliKit #MilliLinker`;
   xText.textContent=xTextStr;
   const ogpUrl=`https://milli-kit-og.onrender.com/cardOgp?uid=${encodeURIComponent(payload.uid||"local")}&v=${payload.updatedAt}`;
   ogpEl.textContent=ogpUrl;
