@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>マイページ | Milli Kit</title>
-<meta name="description" content="Milli Kitのマイページ。作成した名刺の管理や共有ができます。">
+<title data-i18n="mypage.meta.title">マイページ | Milli Kit</title>
+<meta name="description" content="Milli Kitのマイページ。作成した名刺の管理や共有ができます。" data-i18n-desc="mypage.meta.desc">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Milli Kit">
-<meta property="og:title" content="マイページ | Milli Kit">
-<meta property="og:description" content="Milli Kitのマイページ。作成した名刺の管理や共有ができます。">
+<meta property="og:title" content="マイページ | Milli Kit" data-i18n-desc="mypage.meta.title">
+<meta property="og:description" content="Milli Kitのマイページ。作成した名刺の管理や共有ができます。" data-i18n-desc="mypage.meta.desc">
 <meta property="og:image" content="https://milli-kit.pages.dev/images/ogp-kit.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://milli-kit.pages.dev/images/ogp-kit.png">
@@ -48,33 +48,34 @@
 </svg>
 <header id="kitHeader">
   <div class="header-inner">
-    <a class="kit-logo" href="./" aria-label="Milli Kit トップ">
+    <a class="kit-logo" href="./" aria-label="Milli Kit トップ" data-i18n-aria="kit.header.logoAria">
       <img src="images/rogo/milli-kit-rogo.png" alt="Milli Kit" width="1526" height="424" style="height:32px;width:auto;display:block;object-fit:contain;">
     </a>
-    <nav class="kit-nav" aria-label="メインナビゲーション">
-      <a href="./#tools">ツール</a>
-      <a href="linker/" style="background:var(--accent-soft);border:1px solid var(--accent);border-radius:999px;">Milli Linker</a>
-      <a href="mypage.html" style="background:var(--accent);color:#fff;border-radius:999px;">マイページ</a>
+    <nav class="kit-nav" aria-label="メインナビゲーション" data-i18n-aria="kit.header.menuAria">
+      <a href="./#tools" data-i18n="mypage.nav.tools">ツール</a>
+      <a href="linker/" style="background:var(--accent-soft);border:1px solid var(--accent);border-radius:999px;" data-i18n="mypage.nav.linker">Milli Linker</a>
+      <a href="mypage.html" style="background:var(--accent);color:#fff;border-radius:999px;" data-i18n="mypage.nav.mypage">マイページ</a>
     </nav>
     <div class="header-actions">
+      <button id="langToggle" class="cursor-btn" aria-label="Language" title="Language">EN</button>
       <button id="profileBtn" class="profile-btn" onclick="if(typeof kitOpenAccount==='function')kitOpenAccount();else if(typeof mpOpen==='function')mpOpen();" aria-label="アカウント">
         <span id="profileIcon" class="profile-icon" aria-hidden="true"><svg width="18" height="18" aria-hidden="true"><use href="#icon-user"/></svg></span>
-        <span id="profileLabel" class="profile-label">ログイン</span>
+        <span id="profileLabel" class="profile-label" data-i18n="kit.header.login">ログイン</span>
       </button>
-      <button id="hamburger" class="hamburger" aria-label="メニュー" aria-expanded="false" aria-controls="mobileNav"><span></span><span></span><span></span></button>
+      <button id="hamburger" class="hamburger" aria-label="メニュー" data-i18n-aria="kit.header.menuAria" aria-expanded="false" aria-controls="mobileNav"><span></span><span></span><span></span></button>
     </div>
   </div>
   <nav id="mobileNav" class="mobile-nav" aria-hidden="true">
-    <a href="./#tools">ツール一覧</a>
+    <a href="./#tools" data-i18n="kit.nav.toolsList">ツール一覧</a>
     <a href="linker/">Milli Linker</a>
-    <a href="mypage.html">マイページ</a>
+    <a href="mypage.html" data-i18n="mypage.nav.mypage">マイページ</a>
     <a href="https://milli-orbis-portal.pages.dev/" target="_blank" rel="noopener">Milli Orbis</a>
     <a href="https://milli-unishare.pages.dev/" target="_blank" rel="noopener">Milli Unishare</a>
   </nav>
   <div id="drawerBackdrop" class="drawer-backdrop" aria-hidden="true"></div>
 </header>
 <main class="mypage-wrap">
-  <div id="mypageRoot"><p style="text-align:center;color:#6b6a7a;padding:40px;">読み込み中…</p></div>
+  <div id="mypageRoot"><p style="text-align:center;color:#6b6a7a;padding:40px;" data-i18n="mypage.loading">読み込み中…</p></div>
 </main>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -83,6 +84,8 @@
 <script src="firebase-init.js"></script>
 <script src="data/members.js"></script>
 <script src="data.js"></script>
+<script src="data/i18n.js"></script>
+<script src="scripts/i18n.js"></script>
 <script>
 function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 async function load(){
@@ -116,10 +119,10 @@ async function load(){
     }catch(e){}
   }
   if(!data){
-    root.innerHTML=`<div class="mypage-card"><p>まだ名刺がありません。</p><div class="mypage-actions"><a href="linker/" class="kit-btn primary">作成する</a></div></div>`;
+    root.innerHTML=`<div class="mypage-card"><p>${typeof T==="function"?T("mypage.empty"):"まだ名刺がありません。"}</p><div class="mypage-actions"><a href="linker/" class="kit-btn primary">${typeof T==="function"?T("mypage.create"):"作成する"}</a></div></div>`;
     return;
   }
-  const name=data.name||"名無し";
+  const name=data.name||(typeof T==="function"?T("mypage.anonymous"):"名無し");
   const ultimate=data.ultimate||data.ultimateOshi||"";
   const m= (typeof LINKER_MEMBERS!=="undefined"?LINKER_MEMBERS.find(x=>x.id===ultimate):null) || (typeof MEMBERS!=="undefined"?MEMBERS.find(x=>x.id===ultimate):null);
   const color=m?m.color:"#7f7efd";
@@ -127,28 +130,28 @@ async function load(){
     <div class="mypage-card" style="border-top:4px solid ${color}">
       <div style="display:flex;align-items:center;gap:12px;">
         <span style="width:56px;height:56px;border-radius:50%;background:#fff;border:1px solid #e5e3f2;display:grid;place-items:center;overflow:hidden;">${data.icon && (data.icon.startsWith("http")||data.icon.startsWith("data:"))?`<img src="${data.icon.replace(/"/g,'&quot;')}" style="width:100%;height:100%;object-fit:cover">`:`<span>${esc((data.icon||name).slice(0,2))}</span>`}</span>
-        <div><div style="font-weight:800;font-size:16px;">${esc(name)} ${data.title?`<span style="font-size:11px;color:#6b6a7a;font-weight:700;">${esc(data.title)}</span>`:""}</div><div style="font-size:13px;color:#6b6a7a;">${m?`最推し ${esc(m.name)}`:""}</div></div>
+        <div><div style="font-weight:800;font-size:16px;">${esc(name)} ${data.title?`<span style="font-size:11px;color:#6b6a7a;font-weight:700;">${esc(data.title)}</span>`:""}</div><div style="font-size:13px;color:#6b6a7a;">${m?(typeof T==="function"?T("mypage.mostOshiPrefix",{name:esc(m.name)}):`最推し ${esc(m.name)}`):""}</div></div>
         <span style="margin-left:auto;background:${color};color:#fff;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:800;">${m?esc(m.name):""}</span>
       </div>
     </div>
     <div class="mypage-section">
-      <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg> 名刺を管理</h3>
+      <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg> ${typeof T==="function"?T("mypage.manage.title"):"名刺を管理"}</h3>
       <div class="mypage-grid">
-        <a href="linker/" class="mypage-item"><span class="mypage-item-icon"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-edit"/></svg></span><span><span class="mypage-item-title">編集する</span><br><span class="mypage-item-desc">内容を変更</span></span></a>
-        ${link?`<a href="${link}" target="_blank" rel="noopener" class="mypage-item"><span class="mypage-item-icon"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-eye"/></svg></span><span><span class="mypage-item-title">プロフィールを表示</span><br><span class="mypage-item-desc">公開ページを開く</span></span></a>`:`<span class="mypage-item" style="opacity:.6"><span class="mypage-item-icon"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-eye"/></svg></span><span><span class="mypage-item-title">未公開</span><br><span class="mypage-item-desc">公開後に表示</span></span></span>`}
-        <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(`[${name}のMilli Linker名刺 — 最推し ${m?m.name:""}] #ミリプロ好きと繋がりたい #MilliKit #MilliLinker`)}&url=${encodeURIComponent(link||location.href)}" target="_blank" rel="noopener" class="mypage-item" style="background:${color}14;border-color:${color}"><span class="mypage-item-icon" style="background:${color};color:#fff;border-color:${color}"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-x"/></svg></span><span><span class="mypage-item-title">Xで共有</span><br><span class="mypage-item-desc">ポストを作成</span></span></a>
+        <a href="linker/" class="mypage-item"><span class="mypage-item-icon"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-edit"/></svg></span><span><span class="mypage-item-title">${typeof T==="function"?T("mypage.manage.edit"):"編集する"}</span><br><span class="mypage-item-desc">${typeof T==="function"?T("mypage.manage.editDesc"):"内容を変更"}</span></span></a>
+        ${link?`<a href="${link}" target="_blank" rel="noopener" class="mypage-item"><span class="mypage-item-icon"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-eye"/></svg></span><span><span class="mypage-item-title">${typeof T==="function"?T("mypage.manage.view"):"プロフィールを表示"}</span><br><span class="mypage-item-desc">${typeof T==="function"?T("mypage.manage.viewDesc"):"公開ページを開く"}</span></span></a>`:`<span class="mypage-item" style="opacity:.6"><span class="mypage-item-icon"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-eye"/></svg></span><span><span class="mypage-item-title">${typeof T==="function"?T("mypage.manage.unpublished"):"未公開"}</span><br><span class="mypage-item-desc">${typeof T==="function"?T("mypage.manage.unpublishedDesc"):"公開後に表示"}</span></span></span>`}
+        <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(`[${name}のMilli Linker名刺 — 最推し ${m?m.name:""}] #ミリプロ好きと繋がりたい #MilliKit #MilliLinker`)}&url=${encodeURIComponent(link||location.href)}" target="_blank" rel="noopener" class="mypage-item" style="background:${color}14;border-color:${color}"><span class="mypage-item-icon" style="background:${color};color:#fff;border-color:${color}"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-x"/></svg></span><span><span class="mypage-item-title">${typeof T==="function"?T("mypage.manage.shareX"):"Xで共有"}</span><br><span class="mypage-item-desc">${typeof T==="function"?T("mypage.manage.shareDesc"):"ポストを作成"}</span></span></a>
       </div>
     </div>
     ${link?`<div class="mypage-section">
-      <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> 共有</h3>
+      <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> ${typeof T==="function"?T("mypage.share.title"):"共有"}</h3>
       <div style="display:flex;gap:8px;align-items:center;background:#f7f5ff;border:1px solid #e5e3f2;border-radius:12px;padding:10px;">
         <span style="flex:1;font-size:12px;word-break:break-all;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${link}</span>
-        <button onclick="navigator.clipboard.writeText('${link}').then(()=>{this.textContent='コピーしました';setTimeout(()=>this.textContent='コピー',1500)})" style="flex-shrink:0;padding:6px 12px;border-radius:999px;border:1px solid #e5e3f2;background:#fff;font-weight:700;font-size:11px;white-space:nowrap;">コピー</button>
-        <a href="${link}" target="_blank" rel="noopener" style="flex-shrink:0;padding:6px 12px;border-radius:999px;background:#fff;border:1px solid #e5e3f2;text-decoration:none;font-weight:700;font-size:11px;white-space:nowrap;">開く</a>
+        <button onclick="navigator.clipboard.writeText('${link}').then(()=>{this.textContent=(typeof T==="function"?T("mypage.share.copied"):"コピーしました");setTimeout(()=>this.textContent=(typeof T==="function"?T("mypage.share.copy"):"コピー"),1500)})" style="flex-shrink:0;padding:6px 12px;border-radius:999px;border:1px solid #e5e3f2;background:#fff;font-weight:700;font-size:11px;white-space:nowrap;">${typeof T==="function"?T("mypage.share.copy"):"コピー"}</button>
+        <a href="${link}" target="_blank" rel="noopener" style="flex-shrink:0;padding:6px 12px;border-radius:999px;background:#fff;border:1px solid #e5e3f2;text-decoration:none;font-weight:700;font-size:11px;white-space:nowrap;">${typeof T==="function"?T("mypage.share.open"):"開く"}</a>
       </div>
-      <div style="margin-top:12px;text-align:center;"><img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(link)}" alt="QR" width="160" height="160" style="border:1px solid #e5e3f2;border-radius:12px;background:#fff;padding:6px;"><div style="font-size:11px;color:#6b6a7a;margin-top:4px;">QRコード</div></div>
+      <div style="margin-top:12px;text-align:center;"><img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(link)}" alt="QR" width="160" height="160" style="border:1px solid #e5e3f2;border-radius:12px;background:#fff;padding:6px;"><div style="font-size:11px;color:#6b6a7a;margin-top:4px;">${typeof T==="function"?T("mypage.share.qr"):"QRコード"}</div></div>
     </div>`:""}
-    <details style="font-size:11px;color:#6b6a7a;background:#fff;border:1px dashed #e5e3f2;border-radius:12px;padding:10px;"><summary style="cursor:pointer;font-weight:700;">OGP画像について</summary><p style="margin-top:6px;word-break:break-all;">OGPは <code>https://milli-kit-og.onrender.com/cardOgp?uid=${uid||"local"}</code> で生成されます。Xに貼ると名刺が大きく表示されます。</p></details>
+    <details style="font-size:11px;color:#6b6a7a;background:#fff;border:1px dashed #e5e3f2;border-radius:12px;padding:10px;"><summary style="cursor:pointer;font-weight:700;">${typeof T==="function"?T("mypage.ogp.title"):"OGP画像について"}</summary><p style="margin-top:6px;word-break:break-all;">${typeof T==="function"?T("mypage.ogp.descHtml",{uid: uid||"local"}):`OGPは <code>https://milli-kit-og.onrender.com/cardOgp?uid=${uid||"local"}</code> で生成されます。Xに貼ると名刺が大きく表示されます。`}</p></details>
   `;
 }
 document.addEventListener("DOMContentLoaded", load);
@@ -156,9 +159,9 @@ document.addEventListener("DOMContentLoaded", load);
 <script src="scripts/cursor.js"></script>
 <script src="kit.js"></script>
 <footer class="kit-footer">
-  <p class="footer-note">本サイトはファンが運営する非公式サイトです。ミリプロ公式とは一切関係ありません。</p>
-  <p class="footer-note"><a href="legal.html">利用規約</a>・<a href="privacy.html">プライバシーポリシー</a> ／ 公式: <a href="https://milpr.com/" target="_blank" rel="noopener">https://milpr.com/</a></p>
-  <p class="footer-copy">© 2026 Milli Kit</p>
+  <p class="footer-note" data-i18n="mypage.footer.disclaimer">本サイトはファンが運営する非公式サイトです。ミリプロ公式とは一切関係ありません。</p>
+  <p class="footer-note" data-i18n="mypage.footer.linksHtml" data-i18n-html><a href="legal.html">利用規約</a>・<a href="privacy.html">プライバシーポリシー</a> ／ 公式: <a href="https://milpr.com/" target="_blank" rel="noopener">https://milpr.com/</a></p>
+  <p class="footer-copy" data-i18n="mypage.footer.copy">© 2026 Milli Kit</p>
 </footer>
 </body>
 </html>

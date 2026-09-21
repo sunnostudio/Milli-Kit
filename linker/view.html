@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Milli Linker — プロフィール</title>
+<title data-i18n="view.meta.title">Milli Linker — プロフィール</title>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Milli Kit">
-<meta property="og:title" content="Milli Linker プロフィール">
-<meta property="og:description" content="推し・神回を1枚にまとめた名刺です。">
+<meta property="og:title" content="Milli Linker プロフィール" data-i18n-desc="view.meta.title">
+<meta property="og:description" content="推し・神回を1枚にまとめた名刺です。" data-i18n-desc="view.meta.desc">
 <meta property="og:image" content="https://milli-kit.pages.dev/images/icon/512.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="../favicon.ico" sizes="any">
@@ -102,19 +102,20 @@ a:hover .view-media-item{border-color:#fff;outline-color:var(--view-accent);tran
 <header class="linker-header">
   <a href="../" class="linker-back"><img src="../images/rogo/milli-kit-rogo.png" alt="Milli Kit" style="height:22px;width:auto;"></a>
   <img src="../images/rogo/milli-linker-rogo.png" alt="Milli Linker" style="height:28px;width:auto;">
-  <span class="linker-sub">プロフィール</span>
+  <span class="linker-sub" data-i18n="view.header.profile">プロフィール</span>
   <div class="linker-header-actions">
-    <a href="./" class="kit-btn ghost">編集する</a>
-    <a href="../mypage.html" class="kit-btn ghost">マイページ</a>
+    <button id="langToggle" class="kit-btn ghost" type="button" aria-label="Language" title="Language">EN</button>
+    <a href="./" class="kit-btn ghost" data-i18n="view.header.edit">編集する</a>
+    <a href="../mypage.html" class="kit-btn ghost" data-i18n="view.header.mypage">マイページ</a>
   </div>
 </header>
 <main class="view-wrap" id="viewRoot">
-  <p style="text-align:center;color:#6b6a7a;padding:40px;">読み込み中…</p>
+  <p style="text-align:center;color:#6b6a7a;padding:40px;" data-i18n="view.loading">読み込み中…</p>
 </main>
 <footer class="kit-footer">
-  <p class="footer-note">本サイトはファンが運営する非公式サイトです。ミリプロ公式とは一切関係ありません。</p>
-  <p class="footer-note"><a href="../legal.html">利用規約</a>・<a href="../privacy.html">プライバシーポリシー</a> ／ 公式: <a href="https://milpr.com/" target="_blank" rel="noopener">https://milpr.com/</a></p>
-  <p class="footer-copy">© 2026 Milli Kit</p>
+  <p class="footer-note" data-i18n="view.footer.disclaimer">本サイトはファンが運営する非公式サイトです。ミリプロ公式とは一切関係ありません。</p>
+  <p class="footer-note" data-i18n="view.footer.linksHtml" data-i18n-html><a href="../legal.html">利用規約</a>・<a href="../privacy.html">プライバシーポリシー</a> ／ 公式: <a href="https://milpr.com/" target="_blank" rel="noopener">https://milpr.com/</a></p>
+  <p class="footer-copy" data-i18n="view.footer.copy">© 2026 Milli Kit</p>
 </footer>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -123,6 +124,8 @@ a:hover .view-media-item{border-color:#fff;outline-color:var(--view-accent);tran
 <script src="../firebase-init.js"></script>
 <script src="../data/members.js"></script>
 <script src="../data.js"></script>
+<script src="../data/i18n.js"></script>
+<script src="../scripts/i18n.js"></script>
 <script>
 function getParam(n){ return new URLSearchParams(location.search).get(n); }
 function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -171,7 +174,7 @@ async function load(){
     }catch(e){}
   }
   if(!data){
-    root.innerHTML='<p style="text-align:center;color:#c0392b;padding:40px;">プロフィールが見つかりませんでした。<br><a href="./">作成する</a></p>';
+    root.innerHTML='<p style="text-align:center;color:#c0392b;padding:40px;">'+ (typeof T==="function"?T("view.notFoundHtml"):"プロフィールが見つかりませんでした。<br><a href=\"./\">作成する</a>") +'</p>';
     return;
   }
   const ultimate=data.ultimate||data.ultimateOshi||"";
@@ -184,7 +187,7 @@ async function load(){
   const heroGrad = `linear-gradient(135deg, ${color} 0%, ${lightColor} 58%, #ffffff 100%)`;
   document.documentElement.style.setProperty("--view-hero-grad", heroGrad);
   // update og
-  document.querySelector('meta[property="og:title"]').setAttribute("content", `${data.name||"名刺"} — ${mUltimate?mUltimate.name:""} | Milli Linker`);
+  document.querySelector('meta[property="og:title"]').setAttribute("content", `${data.name||(typeof T==="function"?T("view.anonymous"):"名刺")} — ${mUltimate?mUltimate.name:""} | Milli Linker`);
   // SNS — Xを統合してアイコン表示
   function snsIcon(type){
     const map={x:"icon-x",youtube:"icon-youtube",discord:"icon-discord",instagram:"icon-instagram",tiktok:"icon-tiktok",line:"icon-line",wick:"icon-wick"};
@@ -262,9 +265,9 @@ async function load(){
           <span class="view-icon">${iconHtml(data.icon)}</span>
           <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0;">
             <span style="display:flex;flex-direction:column;line-height:1.15;">
-              <span class="view-name">${esc(data.name||"名無し")}</span>
+              <span class="view-name">${esc(data.name||(typeof T==="function"?T("view.anonymous"):"名無し"))}</span>
               ${data.title?`<span class="view-title">${esc(data.title)}</span>`:""}
-              <span class="view-badges">${mUltimate?`<span class="view-badge" style="background:${color};color:#fff;">最推し ${esc(mUltimate.name)}</span>`:""}${birthdayHtml}</span>
+              <span class="view-badges">${mUltimate?`<span class="view-badge" style="background:${color};color:#fff;">${typeof T==="function"?T("view.mostOshiFull",{name:esc(mUltimate.name)}):`最推し ${esc(mUltimate.name)}`}</span>`:""}${birthdayHtml}</span>
             </span>
             ${snsList.length?`<div class="view-hero-sns">${snsHtml}</div>`:""}
           </div>
@@ -272,53 +275,51 @@ async function load(){
         </div>
       </div>
       <div class="view-body">
-        ${mUltimate?`<div class="view-section"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l2.4 4.8L20 8l-4 3.9.9 5.1L12 14.8 7.1 17l.9-5.1L4 8l5.6-1.2z"/></svg> 推し</h3>
+        ${mUltimate?`<div class="view-section"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l2.4 4.8L20 8l-4 3.9.9 5.1L12 14.8 7.1 17l.9-5.1L4 8l5.6-1.2z"/></svg> ${typeof T==="function"?T("view.section.oshi"):"推し"}</h3>
           <div class="view-oshi-grid">
             ${isGroupView?`<div style="display:flex;gap:4px;align-items:end;flex-wrap:wrap;">${GROUP_MEMBERS_VIEW[ultimate].map(id=>{ const mm=(typeof LINKER_MEMBERS!=="undefined"?LINKER_MEMBERS.find(x=>x.id===id):null)||(typeof MEMBERS!=="undefined"?MEMBERS.find(x=>x.id===id):null); const img=mm&&mm.img ? (mm.img.startsWith("http")?mm.img:"../"+mm.img) : ""; const name=mm?mm.name:id; return `<div class="view-oshi-img" style="width:64px;height:64px;"><img src="${img}" alt="${esc(name)}" onerror="this.parentElement.style.display='none'"></div>`; }).join("")}</div>` : (talentImg?`<div class="view-oshi-img"><img src="${talentImg}" alt="${esc(mUltimate.name)}" onerror="this.parentElement.style.display='none'"></div>`:`<div></div>`)}
             <div>
-              <div style="font-size:14px;color:#6b6a7a;line-height:1.6;">最推し: <b style="color:${color};font-size:16px;">${esc(mUltimate.name)}</b> <span style="font-size:12px;">${esc(mUltimate.gen||"")}</span></div>
-              ${favs?`<div style="font-size:12px;color:#6b6a7a;margin-top:4px;">他推し: ${esc(favs)}</div>`:""}
+              <div style="font-size:14px;color:#6b6a7a;line-height:1.6;">${typeof T==="function"?T("view.mostOshi"):"最推し"}: <b style="color:${color};font-size:16px;">${esc(mUltimate.name)}</b> <span style="font-size:12px;">${esc(mUltimate.gen||"")}</span></div>
+              ${favs?`<div style="font-size:12px;color:#6b6a7a;margin-top:4px;">${typeof T==="function"?T("view.otherOshi"):"他推し"}: ${esc(favs)}</div>`:""}
               <div style="font-size:12px;color:#6b6a7a;margin-top:4px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-                ${data.oshiHistory?`<span style="background:#f7f5ff;border:1px solid #e5e3f2;padding:2px 8px;border-radius:999px;">推し歴 ${esc(data.oshiHistory)}</span>`:""}
+                ${data.oshiHistory?`<span style="background:#f7f5ff;border:1px solid #e5e3f2;padding:2px 8px;border-radius:999px;">${typeof T==="function"?T("view.oshiHistory"):"推し歴"} ${esc(data.oshiHistory)}</span>`:""}
                 ${data.oshiMark?`<span style="background:${color};color:#fff;padding:2px 8px;border-radius:999px;">${esc(data.oshiMark)}</span>`:""}
                 ${birthdayHtml?birthdayHtml.replace('view-badge birthday','view-badge').replace('🎂 ',''):""}
               </div>
-              ${mUltimate.fanName?`<div style="font-size:11px;color:#6b6a7a;margin-top:6px;">ファンネーム: ${esc(mUltimate.fanName)}</div>`:""}
+              ${mUltimate.fanName?`<div style="font-size:11px;color:#6b6a7a;margin-top:6px;">${typeof T==="function"?T("view.fanName"):"ファンネーム"}: ${esc(mUltimate.fanName)}</div>`:""}
             </div>
           </div>
         </div>`:""}
-        ${galleryRows.length?`<div class="view-section"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg> 画像ギャラリー</h3><div class="view-gallery">${galleryRows.map(g=>{
+        ${galleryRows.length?`<div class="view-section"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg> ${typeof T==="function"?T("view.section.gallery"):"画像ギャラリー"}</h3><div class="view-gallery">${galleryRows.map(g=>{
           const cap=esc(g.comment||"");
           return `<div class="view-gallery-item"><img src="${g.url}" alt="" loading="lazy" onclick="openLightbox('${g.url.replace(/'/g,"\\'")}')">${cap?`<div class="view-gallery-cap">${cap}</div>`:""}</div>`;
         }).join("")}</div></div>`:""}
-        ${kamiRows.length?`<div class="view-section"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M15 10l4.55-2.28a1 1 0 0 1 1.45.9v8.76a1 1 0 0 1-1.45.9L15 16"/><rect x="1" y="6" width="14" height="12" rx="2"/></svg> 神回（好きな動画）</h3><div class="view-media">${kamiRows.map(r=>{
+        ${kamiRows.length?`<div class="view-section"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M15 10l4.55-2.28a1 1 0 0 1 1.45.9v8.76a1 1 0 0 1-1.45.9L15 16"/><rect x="1" y="6" width="14" height="12" rx="2"/></svg> ${typeof T==="function"?T("view.section.kami"):"神回（好きな動画）"}</h3><div class="view-media">${kamiRows.map(r=>{
           const id=(r.url.match(/v=([A-Za-z0-9_-]{11})/)||[])[1]|| (r.url.match(/youtu\.be\/([A-Za-z0-9_-]{11})/)||[])[1] || "";
           const thumb=id?`https://img.youtube.com/vi/${id}/mqdefault.jpg`:"";
           const unishareUrl=id?`https://milli-unishare.pages.dev/?v=${id}${r.start?`&t=${encodeURIComponent(r.start)}`:""}#watch=${id}`:r.url;
           const title=esc(r.title||"神回");
-          return `<a href="${unishareUrl}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;display:block;"><div class="view-media-item"><div class="goods-tile">${thumb?`<img src="${thumb}" alt="" loading="lazy">`:`<div style="width:100%;height:100%;display:grid;place-items:center;background:#fff;font-size:11px;color:#6b6a7a;">No Image</div>`}</div><div class="view-media-meta"><div style="font-weight:800;font-size:0.92rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${title}${r.start?` <span style="font-size:0.82rem;color:var(--muted);">· ${esc(r.start)}秒</span>`:""}</div>${r.comment?`<div style="font-size:0.85rem;color:var(--muted);margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${esc(r.comment)}</div>`:""}<div style="font-size:0.82rem;color:var(--view-accent);font-weight:800;margin-top:4px;">Unishareで見る →</div></div></div></a>`;
+          return `<a href="${unishareUrl}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;display:block;"><div class="view-media-item"><div class="goods-tile">${thumb?`<img src="${thumb}" alt="" loading="lazy">`:`<div style="width:100%;height:100%;display:grid;place-items:center;background:#fff;font-size:11px;color:#6b6a7a;">${typeof T==="function"?T("view.noImage"):"No Image"}</div>`}</div><div class="view-media-meta"><div style="font-weight:800;font-size:0.92rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${title}${r.start?` <span style="font-size:0.82rem;color:var(--muted);">· ${esc(r.start)}秒</span>`:""}</div>${r.comment?`<div style="font-size:0.85rem;color:var(--muted);margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${esc(r.comment)}</div>`:""}<div style="font-size:0.82rem;color:var(--view-accent);font-weight:800;margin-top:4px;">${typeof T==="function"?T("view.unishare"):"Unishareで見る →"}</div></div></div></a>`;
         }).join("")}</div></div>`:""}
-        ${songRows.length?`<div class="view-section"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> 好きな曲</h3><div class="view-media">${songRows.map(r=>{
+        ${songRows.length?`<div class="view-section"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> ${typeof T==="function"?T("view.section.song"):"好きな曲"}</h3><div class="view-media">${songRows.map(r=>{
           const id=(r.url.match(/v=([A-Za-z0-9_-]{11})/)||[])[1]|| (r.url.match(/youtu\.be\/([A-Za-z0-9_-]{11})/)||[])[1] || "";
           const thumb=id?`https://img.youtube.com/vi/${id}/mqdefault.jpg`:"";
           const millivibeUrl=id?`https://milli-unishare.pages.dev/millivibe.html?v=${id}`:r.url;
           const title=esc(r.title||r.id||"曲");
-          return `<a href="${millivibeUrl}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;display:block;"><div class="view-media-item"><div class="goods-tile">${thumb?`<img src="${thumb}" alt="" loading="lazy">`:`<div style="width:100%;height:100%;display:grid;place-items:center;background:#fff;font-size:11px;color:#6b6a7a;">No Image</div>`}</div><div class="view-media-meta"><div style="font-weight:800;font-size:0.92rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${title}</div>${r.comment?`<div style="font-size:0.85rem;color:var(--muted);margin-top:2px;">${esc(r.comment)}</div>`:""}<div style="font-size:0.82rem;color:var(--view-accent);font-weight:800;margin-top:4px;">Millivibeで見る →</div></div></div></a>`;
+          return `<a href="${millivibeUrl}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;display:block;"><div class="view-media-item"><div class="goods-tile">${thumb?`<img src="${thumb}" alt="" loading="lazy">`:`<div style="width:100%;height:100%;display:grid;place-items:center;background:#fff;font-size:11px;color:#6b6a7a;">${typeof T==="function"?T("view.noImage"):"No Image"}</div>`}</div><div class="view-media-meta"><div style="font-weight:800;font-size:0.92rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${title}</div>${r.comment?`<div style="font-size:0.85rem;color:var(--muted);margin-top:2px;">${esc(r.comment)}</div>`:""}<div style="font-size:0.82rem;color:var(--view-accent);font-weight:800;margin-top:4px;">${typeof T==="function"?T("view.millivibe"):"Millivibeで見る →"}</div></div></div></a>`;
         }).join("")}</div></div>`:""}
-        ${data.free?`<div class="view-section"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg> フリースペース</h3><div class="view-free">${esc(data.free)}</div></div>`:""}
+        ${data.free?`<div class="view-section"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg> ${typeof T==="function"?T("view.section.free"):"フリースペース"}</h3><div class="view-free">${esc(data.free)}</div></div>`:""}
         <div class="view-section" style="background:#f7f5ff;text-align:center;">
-          <div style="font-size:12px;color:#6b6a7a;">この名刺をシェア</div>
+          <div style="font-size:12px;color:#6b6a7a;">${typeof T==="function"?T("view.section.share"):"この名刺をシェア"}</div>
           <div style="margin-top:8px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
-            <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(`[${data.name||""}のMilli Linker名刺 — 最推し ${mUltimate?mUltimate.name:""}] #ミリプロ好きと繋がりたい #MilliKit #MilliLinker`)}&url=${encodeURIComponent(location.href)}" target="_blank" rel="noopener" style="padding:8px 14px;border-radius:999px;background:${color};color:#fff;text-decoration:none;font-weight:800;font-size:12px;">Xで共有</a>
-            <button onclick="navigator.clipboard.writeText(location.href).then(()=>alert('コピーしました'))" style="padding:8px 14px;border-radius:999px;border:1px solid #e5e3f2;background:#fff;font-weight:700;font-size:12px;">リンクをコピー</button>
+            <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(`[${data.name||""}のMilli Linker名刺 — 最推し ${mUltimate?mUltimate.name:""}] #ミリプロ好きと繋がりたい #MilliKit #MilliLinker`)}&url=${encodeURIComponent(location.href)}" target="_blank" rel="noopener" style="padding:8px 14px;border-radius:999px;background:${color};color:#fff;text-decoration:none;font-weight:800;font-size:12px;">${typeof T==="function"?T("view.share.x"):"Xで共有"}</a>
+            <button onclick="navigator.clipboard.writeText(location.href).then(()=>alert(typeof T==="function"?T("view.share.copied"):"コピーしました"))" style="padding:8px 14px;border-radius:999px;border:1px solid #e5e3f2;background:#fff;font-weight:700;font-size:12px;">${typeof T==="function"?T("view.share.copy"):"リンクをコピー"}</button>
           </div>
           <div style="margin-top:10px;padding:10px;background:#fff8cc;border:1px solid #f7d640;border-radius:12px;display:flex;gap:8px;align-items:flex-start;text-align:left;">
             <span style="font-size:16px;flex-shrink:0;">⚠️</span>
             <div style="font-size:12px;line-height:1.6;color:#5a4a00;">
-              <b>X投稿時の注意</b><br>
-              Xの仕様上、画像や引用を同時に付けると名刺（OGP）が正しく表示されません。<br>
-              まずは<b>「文字＋リンク」のみ</b>で投稿してください。<br>
-              画像や引用を付けたい場合は、その投稿への<b>リプライや引用リポスト</b>で追加してください。
+              <b>${typeof T==="function"?T("view.share.warningTitle"):"X投稿時の注意"}</b><br>
+              ${typeof T==="function"?T("view.share.warningDescHtml"):"Xの仕様上、画像や引用を同時に付けると名刺（OGP）が正しく表示されません。<br>まずは<b>「文字＋リンク」のみ</b>で投稿してください。<br>画像や引用を付けたい場合は、その投稿への<b>リプライや引用リポスト</b>で追加してください。"}
             </div>
           </div>
           <div style="margin-top:12px;"><img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(location.href)}" alt="QR" width="160" height="160" style="border:1px solid #e5e3f2;border-radius:12px;background:#fff;padding:6px;"></div>
@@ -327,7 +328,7 @@ async function load(){
       </div>
     </div>
     <div id="lightbox" class="view-lightbox" onclick="this.classList.remove('open')"><img id="lightboxImg" alt=""></div>
-    <p style="text-align:center;margin-top:12px;"><a href="../mypage.html" style="color:${color};font-weight:700;">マイページで見る</a></p>
+    <p style="text-align:center;margin-top:12px;"><a href="../mypage.html" style="color:${color};font-weight:700;">${typeof T==="function"?T("view.mypageLink"):"マイページで見る"}</a></p>
   `;
   // viewer color theming — if viewer has ultimate, dye background lightly
   try{

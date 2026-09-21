@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>利用規約 | Milli Kit</title>
-<meta name="description" content="Milli Kitの利用規約です。">
+<title data-i18n="legal.meta.title">利用規約 | Milli Kit</title>
+<meta name="description" content="Milli Kitの利用規約です。" data-i18n-desc="legal.meta.desc">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Milli Kit">
-<meta property="og:title" content="利用規約 | Milli Kit">
-<meta property="og:description" content="Milli Kitの利用規約です。">
+<meta property="og:title" content="利用規約 | Milli Kit" data-i18n-desc="legal.meta.title">
+<meta property="og:description" content="Milli Kitの利用規約です。" data-i18n-desc="legal.meta.desc">
 <meta property="og:image" content="https://milli-kit.pages.dev/images/ogp-kit.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="favicon.ico" sizes="any">
@@ -30,115 +30,120 @@
 <body>
 <header id="kitHeader">
   <div class="header-inner">
-    <a class="kit-logo" href="./" aria-label="Milli Kit トップ">
+    <a class="kit-logo" href="./" aria-label="Milli Kit トップ" data-i18n-aria="kit.header.logoAria">
       <img src="images/rogo/milli-kit-rogo.png" alt="Milli Kit" style="height:32px;width:auto;display:block;object-fit:contain;">
     </a>
-    <nav class="kit-nav" aria-label="メインナビゲーション">
-      <a href="./#tools">ツール</a>
-      <a href="linker/">Milli Linker</a>
-      <a href="mypage.html">マイページ</a>
+    <nav class="kit-nav" aria-label="メインナビゲーション" data-i18n-aria="kit.header.menuAria">
+      <a href="./#tools" data-i18n="legal.nav.tools">ツール</a>
+      <a href="linker/" data-i18n="legal.nav.linker">Milli Linker</a>
+      <a href="mypage.html" data-i18n="legal.nav.mypage">マイページ</a>
     </nav>
+    <div class="header-actions">
+      <button id="langToggle" class="cursor-btn" aria-label="Language" title="Language">EN</button>
+    </div>
   </div>
 </header>
 <main class="legal-wrap">
   <div class="legal-card">
-    <h1>利用規約</h1>
-    <p>Milli Kit（以下「本サービス」）は、ファンが運営する<b>非公式</b>のファンサイトです。ミリプロ公式および関係各社とは一切関係ありません。公式の発表を常に優先してください。利用した時点で本規約および<a href="privacy.html">プライバシーポリシー</a>に同意したものとみなします。</p>
+    <h1 data-i18n="legal.title">利用規約</h1>
+    <p data-i18n="legal.introHtml" data-i18n-html>Milli Kit（以下「本サービス」）は、ファンが運営する<b>非公式</b>のファンサイトです。ミリプロ公式および関係各社とは一切関係ありません。公式の発表を常に優先してください。利用した時点で本規約および<a href="privacy.html">プライバシーポリシー</a>に同意したものとみなします。</p>
 
     <div class="legal-first">
-      <h2>第1条（ミリプロ公式ガイドラインの遵守）</h2>
-      <p>本サービスの利用にあたっては、ミリプロ公式の<b>ガイドラインを最優先で遵守</b>してください。公式ガイドラインと本規約が異なる場合は、公式ガイドラインが優先されます。</p>
+      <h2 data-i18n="legal.s1.title">第1条（ミリプロ公式ガイドラインの遵守）</h2>
+      <p data-i18n="legal.s1.descHtml" data-i18n-html>本サービスの利用にあたっては、ミリプロ公式の<b>ガイドラインを最優先で遵守</b>してください。公式ガイドラインと本規約が異なる場合は、公式ガイドラインが優先されます。</p>
       <ul>
-        <li><a href="https://milpr.com/guideline" target="_blank" rel="noopener">ミリプロ 二次創作ガイドライン等（公式）</a></li>
-        <li><a href="https://milpr.com/" target="_blank" rel="noopener">ミリプロ 公式サイト</a></li>
+        <li><a href="https://milpr.com/guideline" target="_blank" rel="noopener" data-i18n="legal.s1.link1">ミリプロ 二次創作ガイドライン等（公式）</a></li>
+        <li><a href="https://milpr.com/" target="_blank" rel="noopener" data-i18n="legal.s1.link2">ミリプロ 公式サイト</a></li>
       </ul>
     </div>
 
-    <h2>第2条（適用範囲）</h2>
-    <p>本規約は、Milli Kit全体およびMilli Linker（プロフィール・名刺作成機能）に適用されます。</p>
+    <h2 data-i18n="legal.s2.title">第2条（適用範囲）</h2>
+    <p data-i18n="legal.s2.desc">本規約は、Milli Kit全体およびMilli Linker（プロフィール・名刺作成機能）に適用されます。</p>
 
-    <h2>第3条（権利の帰属）</h2>
+    <h2 data-i18n="legal.s3.title">第3条（権利の帰属）</h2>
     <ol>
-      <li>ミリプロのタレント名・画像・ロゴ・楽曲等の権利は、すべてミリプロおよび各権利者に帰属します。本サービスは権利を主張しません。</li>
-      <li>本サービスのデザイン・コードの著作権は制作者に帰属します。無断転載・無断複製を禁じます。</li>
-      <li>ユーザーが入力・作成したプロフィール内容の責任は、作成したユーザー本人に帰属します（第7条参照）。</li>
+      <li data-i18n="legal.s3.item1">ミリプロのタレント名・画像・ロゴ・楽曲等の権利は、すべてミリプロおよび各権利者に帰属します。本サービスは権利を主張しません。</li>
+      <li data-i18n="legal.s3.item2">本サービスのデザイン・コードの著作権は制作者に帰属します。無断転載・無断複製を禁じます。</li>
+      <li data-i18n="legal.s3.item3">ユーザーが入力・作成したプロフィール内容の責任は、作成したユーザー本人に帰属します（第7条参照）。</li>
     </ol>
 
-    <h2>第4条（禁止事項）</h2>
+    <h2 data-i18n="legal.s4.title">第4条（禁止事項）</h2>
     <ol>
-      <li>本名・住所・電話番号・学校名・顔写真など<b>個人情報の入力</b></li>
-      <li>なりすまし（本人・公式・他ユーザーへの偽装）</li>
-      <li>誹謗中傷・差別・わいせつ・暴力的・公序良俗に反する内容</li>
-      <li>出会い・交際目的での利用、未成年への接触目的の利用</li>
-      <li>金銭の要求・貸借・物販・勧誘等の金銭が絡む行為</li>
-      <li>フォロー・拡散の強要、つきまとい等の迷惑行為</li>
-      <li>スパム・宣伝・営利目的の利用</li>
-      <li>法令に違反する内容、不正アクセス等の妨害行為</li>
+      <li data-i18n="legal.s4.item1" data-i18n-html>本名・住所・電話番号・学校名・顔写真など<b>個人情報の入力</b></li>
+      <li data-i18n="legal.s4.item2">なりすまし（本人・公式・他ユーザーへの偽装）</li>
+      <li data-i18n="legal.s4.item3">誹謗中傷・差別・わいせつ・暴力的・公序良俗に反する内容</li>
+      <li data-i18n="legal.s4.item4">出会い・交際目的での利用、未成年への接触目的の利用</li>
+      <li data-i18n="legal.s4.item5">金銭の要求・貸借・物販・勧誘等の金銭が絡む行為</li>
+      <li data-i18n="legal.s4.item6">フォロー・拡散の強要、つきまとい等の迷惑行為</li>
+      <li data-i18n="legal.s4.item7">スパム・宣伝・営利目的の利用</li>
+      <li data-i18n="legal.s4.item8">法令に違反する内容、不正アクセス等の妨害行為</li>
     </ol>
 
-    <h2>第5条（公開範囲と個人情報の注意）</h2>
+    <h2 data-i18n="legal.s5.title">第5条（公開範囲と個人情報の注意）</h2>
     <ol>
-      <li>Milli Linkerで作成したプロフィールページ・OGP画像は<b>全世界に公開</b>され、検索・SNS拡散の対象になります。</li>
-      <li>一度拡散した内容（Xへの転載・スクリーンショット・検索やOGPのキャッシュ等）は、プロフィールを削除しても<b>取り消せない場合があります</b>。公開前に内容をよく確認してください。</li>
-      <li>公開したSNSリンク経由の連絡・トラブルは自己責任です。<b>個人情報は絶対に入力しないでください。</b></li>
-      <li>13歳未満の方は利用できません。18歳未満の方は保護者の同意のうえ利用してください。</li>
+      <li data-i18n="legal.s5.item1" data-i18n-html>Milli Linkerで作成したプロフィールページ・OGP画像は<b>全世界に公開</b>され、検索・SNS拡散の対象になります。</li>
+      <li data-i18n="legal.s5.item2" data-i18n-html>一度拡散した内容（Xへの転載・スクリーンショット・検索やOGPのキャッシュ等）は、プロフィールを削除しても<b>取り消せない場合があります</b>。公開前に内容をよく確認してください。</li>
+      <li data-i18n="legal.s5.item3" data-i18n-html>公開したSNSリンク経由の連絡・トラブルは自己責任です。<b>個人情報は絶対に入力しないでください。</b></li>
+      <li data-i18n="legal.s5.item4">13歳未満の方は利用できません。18歳未満の方は保護者の同意のうえ利用してください。</li>
     </ol>
 
-    <h2>第6条（投稿内容の利用許諾）</h2>
+    <h2 data-i18n="legal.s6.title">第6条（投稿内容の利用許諾）</h2>
     <ol>
-      <li>ユーザーは、作成したプロフィール・名刺を、本サービスの紹介・配信企画（スライドショー等）で紹介・表示することを、無償で許諾するものとします。</li>
-      <li>紹介を希望しない場合は、事前に連絡してください。連絡後の新規利用は行いません（既出分は取り下げられない場合があります）。</li>
+      <li data-i18n="legal.s6.item1">ユーザーは、作成したプロフィール・名刺を、本サービスの紹介・配信企画（スライドショー等）で紹介・表示することを、無償で許諾するものとします。</li>
+      <li data-i18n="legal.s6.item2">紹介を希望しない場合は、事前に連絡してください。連絡後の新規利用は行いません（既出分は取り下げられない場合があります）。</li>
     </ol>
 
-    <h2>第7条（免責事項）</h2>
+    <h2 data-i18n="legal.s7.title">第7条（免責事項）</h2>
     <ol>
-      <li>本サービスは<b>予告なく変更・停止・削除</b>する場合があります。データの消失・破損について責任を負いません（大事な内容は各自保管してください）。</li>
-      <li>プロフィール・OGPへの記入内容はすべて作成ユーザーの意図によるもので、内容に起因する<b>いざこざ・トラブル・損害について制作者は一切責任を負いません</b>。</li>
-      <li>SNS公開により起きたトラブル（迷惑連絡・特定等）についても同様に責任を負いません。</li>
-      <li>外部サービス（Firebase・Cloudinary・QR生成・oEmbed等）の障害・仕様変更による不具合は免責とします。</li>
+      <li data-i18n="legal.s7.item1" data-i18n-html>本サービスは<b>予告なく変更・停止・削除</b>する場合があります。データの消失・破損について責任を負いません（大事な内容は各自保管してください）。</li>
+      <li data-i18n="legal.s7.item2" data-i18n-html>プロフィール・OGPへの記入内容はすべて作成ユーザーの意図によるもので、内容に起因する<b>いざこざ・トラブル・損害について制作者は一切責任を負いません</b>。</li>
+      <li data-i18n="legal.s7.item3">SNS公開により起きたトラブル（迷惑連絡・特定等）についても同様に責任を負いません。</li>
+      <li data-i18n="legal.s7.item4">外部サービス（Firebase・Cloudinary・QR生成・oEmbed等）の障害・仕様変更による不具合は免責とします。</li>
     </ol>
 
-    <h2>第8条（個人間のトラブル）</h2>
+    <h2 data-i18n="legal.s8.title">第8条（個人間のトラブル）</h2>
     <ol>
-      <li>ユーザー間のDM・取引・交流に関するトラブルは当事者間で解決するものとし、運営は仲介しません。</li>
-      <li>困った場合はブロック・ミュート・通報機能の利用と、第11条への連絡を推奨します。</li>
+      <li data-i18n="legal.s8.item1">ユーザー間のDM・取引・交流に関するトラブルは当事者間で解決するものとし、運営は仲介しません。</li>
+      <li data-i18n="legal.s8.item2">困った場合はブロック・ミュート・通報機能の利用と、第11条への連絡を推奨します。</li>
     </ol>
 
-    <h2>第9条（保存データの取扱い）</h2>
-    <p>保存される情報・委託先・削除手順等の詳細は<a href="privacy.html">プライバシーポリシー</a>をご覧ください。</p>
+    <h2 data-i18n="legal.s9.title">第9条（保存データの取扱い）</h2>
+    <p data-i18n="legal.s9.descHtml" data-i18n-html>保存される情報・委託先・削除手順等の詳細は<a href="privacy.html">プライバシーポリシー</a>をご覧ください。</p>
 
-    <h2>第10条（違反時の措置）</h2>
-    <p>本規約違反・不適切内容を確認した場合、<b>連絡なく</b>プロフィールの削除・非公開化を行います。悪質な場合はMilli OrbisアカウントのBAN、ミリプロをはじめとする然るべき関係先への連絡・相談を行う場合があります。</p>
+    <h2 data-i18n="legal.s10.title">第10条（違反時の措置）</h2>
+    <p data-i18n="legal.s10.descHtml" data-i18n-html>本規約違反・不適切内容を確認した場合、<b>連絡なく</b>プロフィールの削除・非公開化を行います。悪質な場合はMilli OrbisアカウントのBAN、ミリプロをはじめとする然るべき関係先への連絡・相談を行う場合があります。</p>
 
-    <h2>第11条（通報・連絡先）</h2>
-    <p>不適切内容を見つけた場合：X <a href="https://x.com/SunSunmachi" target="_blank" rel="noopener">@SunSunmachi</a> までご連絡ください。</p>
+    <h2 data-i18n="legal.s11.title">第11条（通報・連絡先）</h2>
+    <p data-i18n="legal.s11.descHtml" data-i18n-html>不適切内容を見つけた場合：X <a href="https://x.com/SunSunmachi" target="_blank" rel="noopener">@SunSunmachi</a> までご連絡ください。</p>
 
-    <h2>第12条（準拠法・管轄・運営）</h2>
+    <h2 data-i18n="legal.s12.title">第12条（準拠法・管轄・運営）</h2>
     <ol>
-      <li>本規約は日本法に準拠します。本サービスに関する紛争は、東京地方裁判所を第一審の専属的合意管轄とします。</li>
-      <li>運営：個人（ファン運営）。連絡先は第11条の通りです。</li>
+      <li data-i18n="legal.s12.item1">本規約は日本法に準拠します。本サービスに関する紛争は、東京地方裁判所を第一審の専属的合意管轄とします。</li>
+      <li data-i18n="legal.s12.item2">運営：個人（ファン運営）。連絡先は第11条の通りです。</li>
     </ol>
 
-    <h2>第13条（規約の変更）</h2>
-    <p>本規約は予告なく変更する場合があります。変更後は本ページに掲示します。</p>
+    <h2 data-i18n="legal.s13.title">第13条（規約の変更）</h2>
+    <p data-i18n="legal.s13.desc">本規約は予告なく変更する場合があります。変更後は本ページに掲示します。</p>
 
-    <h2>画像・素材の引用元</h2>
+    <h2 data-i18n="legal.sources.title">画像・素材の引用元</h2>
     <ul>
-      <li>タレント画像・ロゴ：ミリプロ公式素材（ファン利用の範囲で使用）</li>
-      <li>一部の画像・素材は、制作者がCanva等の外部サービスを通して編集したものを含みます</li>
-      <li>SNSアイコン：Simple Icons</li>
-      <li>フォント：M PLUS Rounded 1c・Noto Sans JP・Barlow（Google Fonts / Fontsource）</li>
-      <li>動画情報：YouTube oEmbed（noembed経由）、QRコード：api.qrserver.com、画像配信：Cloudinary</li>
+      <li data-i18n="legal.sources.item1">タレント画像・ロゴ：ミリプロ公式素材（ファン利用の範囲で使用）</li>
+      <li data-i18n="legal.sources.item2">一部の画像・素材は、制作者がCanva等の外部サービスを通して編集したものを含みます</li>
+      <li data-i18n="legal.sources.item3">SNSアイコン：Simple Icons</li>
+      <li data-i18n="legal.sources.item4">フォント：M PLUS Rounded 1c・Noto Sans JP・Barlow（Google Fonts / Fontsource）</li>
+      <li data-i18n="legal.sources.item5">動画情報：YouTube oEmbed（noembed経由）、QRコード：api.qrserver.com、画像配信：Cloudinary</li>
     </ul>
 
-    <p class="legal-meta">制定：2026年9月21日</p>
+    <p class="legal-meta" data-i18n="legal.enacted">制定：2026年9月21日</p>
   </div>
 </main>
 <footer class="kit-footer">
-  <p class="footer-note">本サイトはファンが運営する非公式サイトです。ミリプロ公式とは一切関係ありません。</p>
-  <p class="footer-note"><a href="legal.html">利用規約</a>・<a href="privacy.html">プライバシーポリシー</a> ／ 公式: <a href="https://milpr.com/" target="_blank" rel="noopener">https://milpr.com/</a></p>
-  <p class="footer-copy">© 2026 Milli Kit</p>
+  <p class="footer-note" data-i18n="legal.footer.disclaimer">本サイトはファンが運営する非公式サイトです。ミリプロ公式とは一切関係ありません。</p>
+  <p class="footer-note" data-i18n="legal.footer.linksHtml" data-i18n-html><a href="legal.html">利用規約</a>・<a href="privacy.html">プライバシーポリシー</a> ／ 公式: <a href="https://milpr.com/" target="_blank" rel="noopener">https://milpr.com/</a></p>
+  <p class="footer-copy" data-i18n="legal.footer.copy">© 2026 Milli Kit</p>
 </footer>
+<script src="data/i18n.js"></script>
+<script src="scripts/i18n.js"></script>
 <script src="scripts/cursor.js"></script>
 <script src="kit.js"></script>
 </body>

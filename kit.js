@@ -135,7 +135,7 @@ function initCursor(){
   const disable = document.createElement("button");
   disable.type = "button";
   disable.className = "cursor-disable";
-  disable.textContent = "カーソルを無効化（デフォルトに戻す）";
+  disable.textContent = (typeof T==="function" ? (function(){ var v=T("kit.cursor.disable"); return v==="kit.cursor.disable" ? "カーソルを無効化（デフォルトに戻す）" : v; })() : "カーソルを無効化（デフォルトに戻す）");
   disable.addEventListener("click", ()=>{
     setKitCursor("");
     close();
@@ -241,6 +241,27 @@ function applyKitCursor(){
   }
 }
 
+function getServiceField(id, field, fallback){
+  try{
+    var key="kit.services."+id+"."+field;
+    if(typeof T==="function"){
+      var v=T(key);
+      if(v!==key) {
+        if(Array.isArray(v)) return v;
+        return v;
+      }
+    }
+    // fallback for array pills: check dict directly
+    if(field==="pills"){
+      var lang=(typeof milliLang!=="undefined" && milliLang.get) ? milliLang.get() : "ja";
+      var dict=(window.I18N && (window.I18N[lang]||window.I18N.ja))||{};
+      if(dict[key]!==undefined) return dict[key];
+      var dictJa=window.I18N && window.I18N.ja;
+      if(dictJa && dictJa[key]!==undefined) return dictJa[key];
+    }
+  }catch(e){}
+  return fallback;
+}
 function renderCards(list, grid){
   grid.innerHTML = "";
   list.forEach(s=>{
@@ -248,21 +269,25 @@ function renderCards(list, grid){
     card.className = "tool-card"+(s.featured?" featured":"");
     const externalAttr = s.external ? `target="_blank" rel="noopener"` : "";
     const externalIcon = s.external ? `<svg width="12" height="12" aria-hidden="true"><use href="#icon-external"/></svg>` : `<svg width="14" height="14" aria-hidden="true"><use href="#icon-chevron"/></svg>`;
+    var tag=getServiceField(s.id,"tag",s.tag);
+    var desc=getServiceField(s.id,"desc",s.desc);
+    var cta=getServiceField(s.id,"cta",s.cta);
+    var pills=getServiceField(s.id,"pills",s.pills);
     card.innerHTML = `
       <div class="tool-head">
         <span class="tool-icon large" aria-hidden="true">${iconForService(s)}</span>
         <span>
           <span class="tool-title">${escapeHtml(s.title)}</span><br>
-          <span class="tool-tag">${escapeHtml(s.tag)}</span>
+          <span class="tool-tag">${escapeHtml(tag)}</span>
         </span>
       </div>
       ${s.thumb ? `<div class="tool-thumb"><img src="${s.thumb}" alt="" loading="lazy"></div>` : `<div class="tool-thumb" aria-hidden="true"><span class="thumb-icon">${iconForService(s,true)}</span></div>`}
       <div class="tool-body">
-        <p class="tool-desc">${escapeHtml(s.desc)}</p>
-        <div class="tool-meta">${s.pills.map(p=> `<span class="tool-pill">${escapeHtml(p)}</span>`).join("")}</div>
+        <p class="tool-desc">${escapeHtml(desc)}</p>
+        <div class="tool-meta">${pills.map(p=> `<span class="tool-pill">${escapeHtml(p)}</span>`).join("")}</div>
       </div>
       <div class="tool-actions">
-        <a href="${s.href}" ${externalAttr} class="btn ${s.featured?"btn-primary":"btn-ghost"}">${escapeHtml(s.cta)} ${externalIcon}</a>
+        <a href="${s.href}" ${externalAttr} class="btn ${s.featured?"btn-primary":"btn-ghost"}">${escapeHtml(cta)} ${externalIcon}</a>
       </div>
     `;
     grid.appendChild(card);
@@ -305,7 +330,7 @@ function initAuth(){
     const logged = isLogged || !!name || !!localStorage.getItem("millipro_userdata");
 
     if(logged && (name || icon)){
-      labelEl.textContent = name || "マイページ";
+      labelEl.textContent = name || (typeof T==="function" ? (function(){ var v=T("kit.account.mypage"); return v==="kit.account.mypage" ? "マイページ" : v; })() : "マイページ");
       if(icon && (icon.startsWith("http") || icon.startsWith("data:"))){
         iconEl.innerHTML = `<img src="${escapeAttr(icon)}" alt="">`;
       } else if(icon){
@@ -317,7 +342,7 @@ function initAuth(){
       }
       // also update header dot if you like
     } else {
-      labelEl.textContent = "ログイン";
+      labelEl.textContent = (typeof T==="function" ? (function(){ var v=T("kit.header.login"); return v==="kit.header.login" ? "ログイン" : v; })() : "ログイン");
       iconEl.innerHTML = `<svg width="18" height="18" aria-hidden="true"><use href="#icon-user"/></svg>`;
     }
   }
