@@ -1,0 +1,16 @@
+# dependencies
+server/node_modules/
+node_modules/
+
+# logs / os
+.DS_Store
+*.log
+npm-debug.log*
+
+# env
+.env
+.env.local
+
+# Cloudflare / Render cache
+.wrangler/
+dist/
