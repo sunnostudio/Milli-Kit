@@ -639,7 +639,31 @@ function lightenColor(hex, amt){
     return `rgb(${nr},${ng},${nb})`;
   }catch(e){ return "#fff"; }
 }
+let _saveWasReady=null;
+function updateSaveBtnState(){
+  const name=(document.getElementById("fieldName")?.value||"").trim();
+  const ult=document.getElementById("oshiUltimate")?.dataset.value||"";
+  const missing=[];
+  if(!name) missing.push("名前");
+  if(!ult) missing.push("最推し");
+  const ready=missing.length===0;
+  ["saveBtn","saveBtn2"].forEach(id=>{
+    const b=document.getElementById(id);
+    if(!b) return;
+    b.classList.toggle("is-incomplete",!ready);
+    b.classList.toggle("is-ready",ready);
+    b.disabled=!ready;
+    b.title=ready?"公開できます":("あと「"+missing.join("・")+"」を入力してください");
+    if(ready && _saveWasReady===false){
+      b.classList.remove("btn-pop"); void b.offsetWidth; b.classList.add("btn-pop");
+    }
+  });
+  const hint=document.getElementById("saveHint");
+  if(hint) hint.textContent=ready?"公開できます！":("あと「"+missing.join("・")+"」で公開できます");
+  _saveWasReady=ready;
+}
 function updatePreview(){
+  updateSaveBtnState();
   const name=document.getElementById("fieldName")?.value||"あなたの名前";
   const shoulder=document.getElementById("fieldTitle")?.value||"";
   const icon=document.getElementById("fieldIcon")?.value||"";

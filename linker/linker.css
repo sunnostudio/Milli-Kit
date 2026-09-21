@@ -34,6 +34,12 @@
 .kit-btn.ghost{ background:#fff; color:var(--official-text); }
 .kit-btn.small{ padding:7px 12px; font-size:12px; }
 .kit-btn.large{ padding:12px 18px; font-size:14px; width:100%; justify-content:center; }
+/* 公開ボタン: 必須未入力で薄く、揃ったら濃く+ポップ */
+#saveBtn.is-incomplete,#saveBtn2.is-incomplete{ opacity:.45; filter:saturate(.35); cursor:not-allowed; box-shadow:none; }
+#saveBtn.is-ready,#saveBtn2.is-ready{ box-shadow:0 6px 20px rgba(127,126,253,.4); }
+@keyframes btnPop{ 0%{transform:scale(1)} 40%{transform:scale(1.06)} 100%{transform:scale(1)} }
+#saveBtn.btn-pop,#saveBtn2.btn-pop{ animation:btnPop .35s ease; }
+#saveHint{ font-size:11px; color:#8a86a3; text-align:center; min-height:1.4em; }
 
 .linker-main{
   max-width:1120px; margin:0 auto; width:100%;
