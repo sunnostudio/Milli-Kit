@@ -284,16 +284,20 @@ async function renderCardOgp(opts){
     if(oshiMark){
       tspan += `<tspan fill="${escXml(color)}">${escXml(oshiMark)}</tspan>`;
     }
+    // 同一行に収める場合は1つの<text>にtspanを連ねて被りを防ぐ（novaのみ改行）
     if(tspan){
-      svg+=`<text x="${textX}" y="${fy}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="${isEn?32:34}" font-weight="700">${tspan}</text>`;
-    }
-    // favCount — novaは改行
-    if(favCount>0){
-      if(ultimate==="nova"){
-        svg+=`<text x="${textX}" y="${fy+30}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="20" font-weight="600" fill="#6b6a7a">${escXml(`他${favCount}推し`)}</text>`;
-      } else if(tspan){
-        svg+=`<text x="${textX}" y="${fy}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="20" font-weight="600" fill="#6b6a7a"><tspan dx="8">${escXml(`他${favCount}推し`)}</tspan></text>`;
+      if(favCount>0 && ultimate!=="nova"){
+        // fanName/oshiMark と同じ行に「他○推し」を追記 — 被り対策で同一text内のtspanにする
+        tspan += `<tspan dx="8" font-size="20" font-weight="600" fill="#6b6a7a">${escXml(`他${favCount}推し`)}</tspan>`;
+        svg+=`<text x="${textX}" y="${fy}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="${isEn?32:34}" font-weight="700">${tspan}</text>`;
       } else {
+        svg+=`<text x="${textX}" y="${fy}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="${isEn?32:34}" font-weight="700">${tspan}</text>`;
+        if(favCount>0 && ultimate==="nova"){
+          svg+=`<text x="${textX}" y="${fy+30}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="20" font-weight="600" fill="#6b6a7a">${escXml(`他${favCount}推し`)}</text>`;
+        }
+      }
+    } else {
+      if(favCount>0){
         svg+=`<text x="${textX}" y="${fy}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="20" font-weight="600" fill="#6b6a7a">${escXml(`他${favCount}推し`)}</text>`;
       }
     }
