@@ -10,10 +10,24 @@
 
   var STORAGE_KEY = "milli-lang";
 
+  var LANGS = ["ja","en","zh","ko"];
+  function normalizeLang(v){
+    if(!v) return "";
+    v = String(v).toLowerCase();
+    if(v==="zh" || v.indexOf("zh")===0) return "zh";
+    if(v==="ko" || v.indexOf("ko")===0) return "ko";
+    if(v==="en" || v.indexOf("en")===0) return "en";
+    if(v==="ja" || v.indexOf("ja")===0) return "ja";
+    return "";
+  }
   function stored() {
     try {
       var v = localStorage.getItem(STORAGE_KEY);
-      if (v === "ja" || v === "en") return v;
+      v = normalizeLang(v);
+      if(v) return v;
+      // 旧キー "milli-lang" 以外の旧値 "zh-CN" 等も吸収
+      var v2 = localStorage.getItem("milli-lang");
+      if(v2) { v2=normalizeLang(v2); if(v2) return v2; }
     } catch (e) {}
     return "";
   }
@@ -22,7 +36,10 @@
     var v = stored();
     if (v) return v;
     var nav = (navigator.language || "ja").toLowerCase();
-    return nav.indexOf("en") === 0 ? "en" : "ja";
+    if(nav.indexOf("zh")===0) return "zh";
+    if(nav.indexOf("ko")===0) return "ko";
+    if(nav.indexOf("en")===0) return "en";
+    return "ja";
   }
 
   function setLang(l) {
@@ -50,22 +67,33 @@
       (window.I18N && window.I18N.ja && window.I18N.ja[key] !== undefined);
   }
 
-  /* データ（data.js 等）のローカライズ。オブジェクトの en ブロックがあれば英語を、
-     なければ（未訳・日本語表記が正）元の値を返す。配列も対応 */
+  /* データ（data.js 等）のローカライズ。言語ブロックがあればそれを、なければ日本語を返す */
   function loc(obj, key) {
     if (!obj) return undefined;
     var v = obj[key];
-    if (getLang() === "en" && obj.en) {
-      var ev = obj.en[key];
+    var lang = getLang();
+    if (obj[lang]) {
+      var ev = obj[lang][key];
       if (ev !== undefined && ev !== null && ev !== "") return ev;
+    }
+    // en は zh/ko のフォールバックとしても使う
+    if (lang !== "en" && lang !== "ja" && obj.en) {
+      var ev2 = obj.en[key];
+      if (ev2 !== undefined && ev2 !== null && ev2 !== "") return ev2;
     }
     return v;
   }
 
-  /* メンバー名のローカライズ。EN 表示時は nameEn があればそれを返す */
+  /* メンバー名のローカライズ */
   function mName(m) {
     if (!m) return "";
-    if (getLang() === "en" && m.nameEn) return m.nameEn;
+    var lang = getLang();
+    if (m[lang] && m[lang].name) return m[lang].name;
+    if (lang !== "ja") {
+      if (lang === "zh" && m.nameZh) return m.nameZh;
+      if (lang === "ko" && m.nameKo) return m.nameKo;
+      if (m.nameEn) return m.nameEn;
+    }
     return m.name || m.nameEn || "";
   }
 
@@ -139,13 +167,17 @@
     });
   }
 
+  var LANG_LABEL = {ja:"EN", en:"中文", zh:"한국어", ko:"JA"};
+  var LANG_NEXT = {ja:"en", en:"zh", zh:"ko", ko:"ja"};
   function initLangToggle() {
     var btns = document.querySelectorAll("#langToggle, #mobileLangToggle");
     if (!btns.length) return;
-    btns.forEach(function (b) { b.textContent = getLang() === "ja" ? "EN" : "JA"; });
+    var cur = getLang();
+    btns.forEach(function (b) { b.textContent = LANG_LABEL[cur] || cur.toUpperCase(); b.setAttribute("aria-label", "Language: "+cur+" -> "+(LANG_NEXT[cur]||"ja")); });
     btns.forEach(function (b) {
       b.addEventListener("click", function () {
-        setLang(getLang() === "ja" ? "en" : "ja");
+        var nxt = LANG_NEXT[getLang()] || "ja";
+        setLang(nxt);
         location.reload();
       });
     });
