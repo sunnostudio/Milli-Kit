@@ -235,23 +235,13 @@ async function drawOgpToCanvas(canvas, opts){
   const nameFont=isEn?`800 68px ${fontEn}`:`800 70px ${fontJa}`;
   ctx.font=nameFont;
   const nameY=168;
-  let displayName=name;
-  if(ctx.measureText(displayName).width > 740){
-    while(displayName.length>1 && ctx.measureText(displayName+"…").width>740) displayName=displayName.slice(0,-1);
-    displayName+="…";
-  }
-  ctx.fillText(displayName, textX, nameY);
-  // Shoulder title — small below name to avoid overlap
+  ctx.fillText(name, textX, nameY);
+  // Shoulder title
   let shoulderY=nameY+26;
   if(shoulderTitle){
     ctx.font=isEn?`600 22px ${fontEn}`:`600 22px ${fontJa}`;
     ctx.fillStyle="#6b6a7a";
-    let st=shoulderTitle;
-    if(ctx.measureText(st).width>740){
-      while(st.length>1 && ctx.measureText(st+"…").width>740) st=st.slice(0,-1);
-      st+="…";
-    }
-    ctx.fillText(st, textX, shoulderY);
+    ctx.fillText(shoulderTitle, textX, shoulderY);
     shoulderY+=18;
   }
   // X + 推し歴
@@ -261,33 +251,30 @@ async function drawOgpToCanvas(canvas, opts){
   if(xHandle) subParts.push(`@${xHandle.replace(/^@/,"")}`);
   if(oshiHistory) subParts.push(oshiHistory);
   if(subParts.length){ ctx.fillText(subParts.join("  •  "), textX, subY); subY+=30; } else subY+=10;
-  // FanName + official 2-emoji fanMark + oshiMark
+  // FanName + fanMark + oshiMark (そのまま全表示)
   ctx.font=isEn?`700 32px ${fontEn}`:`700 34px ${fontJa}`;
-  ctx.fillStyle="#6b6a7a";
   let fanY=subY+8;
   let fanX=textX;
-  if(fanMarkEmojis){
-    ctx.fillText(fanMarkEmojis, fanX, fanY);
-    fanX+=ctx.measureText(fanMarkEmojis).width+10;
-  }
-  if(fanName){
-    ctx.fillText(fanName, fanX, fanY);
-    fanX+=ctx.measureText(fanName).width+10;
-  }
-  if(oshiMark){
-    ctx.fillStyle=color;
-    ctx.fillText(oshiMark, fanX, fanY);
-    fanX+=ctx.measureText(oshiMark).width+10;
-  }
+  if(fanMarkEmojis){ ctx.fillStyle="#6b6a7a"; ctx.fillText(fanMarkEmojis, fanX, fanY); fanX+=ctx.measureText(fanMarkEmojis).width+10; }
+  if(fanName){ ctx.fillStyle="#6b6a7a"; ctx.fillText(fanName, fanX, fanY); fanX+=ctx.measureText(fanName).width+10; }
+  if(oshiMark){ ctx.fillStyle=color; ctx.fillText(oshiMark, fanX, fanY); fanX+=ctx.measureText(oshiMark).width+10; }
+  // NOVAのみ◯推しをファンマークの下に改行
+  let wrapExtra=0;
   if(favCount>0){
-    ctx.fillStyle="#6b6a7a"; ctx.font=`600 20px ${isEn?fontEn:fontJa}`;
-    ctx.fillText(`他${favCount}推し`, fanX, fanY);
+    ctx.font=`600 20px ${isEn?fontEn:fontJa}`;
+    ctx.fillStyle="#6b6a7a";
+    if(ultimate==="nova"){
+      ctx.fillText(`他${favCount}推し`, textX, fanY+30);
+      wrapExtra=30;
+    } else {
+      ctx.fillText(`他${favCount}推し`, fanX, fanY);
+    }
   }
   // badge + birthday pill
   let badgeBottom = fanY;
   if(m){
     const badgeText=isEn?`Fave: ${m.nameEn||m.name}`:`最推し ${m.name}`;
-    const badgeY=fanY+34;
+    const badgeY=fanY+34+wrapExtra;
     ctx.font=isEn?`800 19px ${fontEn}`:`800 20px ${fontJa}`;
     const padX=16, tw=ctx.measureText(badgeText).width, bw=tw+padX*2, bh=30;
     const bx=textX, by=badgeY-20;
@@ -312,7 +299,7 @@ async function drawOgpToCanvas(canvas, opts){
     const mm=birthday.match(/^(\d{4})-(\d{2})-(\d{2})$/);
     if(mm){
       const bdayText = birthdayPublic==="full" ? `${mm[1]}/${mm[2]}/${mm[3]}` : `${mm[2]}/${mm[3]}`;
-      const badgeY=fanY+34;
+      const badgeY=fanY+34+wrapExtra;
       ctx.font=`700 16px ${fontJa}`;
       const iconW=14;
       const bPadX=10, bTw=ctx.measureText(bdayText).width, bW=bTw+iconW+6+bPadX*2, bH=26;
