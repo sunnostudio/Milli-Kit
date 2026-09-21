@@ -25,6 +25,18 @@ try {
 } catch (e) {
   console.warn("members.json load failed", e.message);
 }
+// data.js の MEMBERS(ファンネーム等) を副作用なしで読む
+let FULL = [];
+try {
+  const vm = require("vm");
+  const src = fs.readFileSync(path.join(__dirname, "..", "data.js"), "utf8");
+  const ctx = {};
+  vm.createContext(ctx);
+  vm.runInContext(src + '\nthis.__M=(typeof MEMBERS!=="undefined"?MEMBERS:[]);', ctx, { timeout: 5000 });
+  if (Array.isArray(ctx.__M)) FULL = ctx.__M;
+} catch (e) {
+  console.warn("data.js load failed", e.message);
+}
 
 async function fetchJson(url, ms) {
   const ctl = new AbortController();
@@ -67,11 +79,14 @@ async function renderCardOgp({ name, icon, ultimate, oshiMark, lang }) {
   const W = 1200, H = 630;
   const m = MEMBERS.find((x) => x.id === ultimate) || null;
   const color = m ? m.color : "#7f7efd";
-  const fanName = m ? m.fanName || "" : "";
+  const full = FULL.find((x) => x.id === ultimate) || null;
+  const fanName = (full && full.fanName) || (m && m.fanName) || "";
   const isEn = lang === "en";
   const fJa = "'M PLUS Rounded 1c','Noto Sans JP',sans-serif";
   const fEn = "'Barlow',sans-serif";
   const badgeText = m ? (isEn ? `Fave: ${m.nameEn || m.name}` : `最推し ${m.name}`) : "";
+  // バッジ幅: 日英混在を考慮 (ASCII約11px・他約20px @19px前後)
+  const badgeW = [...badgeText].reduce((a, c) => a + (c.charCodeAt(0) < 128 ? 11 : 20), 0) + 32;
   const displayName = name || "";
 
   let iconPng = null;
@@ -93,7 +108,7 @@ async function renderCardOgp({ name, icon, ultimate, oshiMark, lang }) {
     `<circle cx="134" cy="154" r="70" fill="#f7f5ff" stroke="${color}" stroke-width="4"/>` +
     `<text x="232" y="175" font-family="${isEn ? fEn : fJa}" font-size="${isEn ? 56 : 62}" font-weight="800" fill="#222">${escXml(displayName)}</text>` +
     `<text x="232" y="215" font-family="${isEn ? fEn : fJa}" font-size="${isEn ? 26 : 28}" font-weight="700" fill="#6b6a7a">${escXml(fanName)}${oshiMark ? ` ${escXml(oshiMark)}` : ""}</text>` +
-    (m ? `<g><rect x="232" y="238" rx="14" ry="14" width="${badgeText.length * 11 + 28}" height="28" fill="${color}"/>` +
+    (m ? `<g><rect x="232" y="238" rx="14" ry="14" width="${badgeW}" height="28" fill="${color}"/>` +
       `<text x="246" y="257" font-family="${isEn ? fEn : fJa}" font-size="${isEn ? 18 : 19}" font-weight="800" fill="#fff">${escXml(badgeText)}</text></g>` : "") +
     `<text x="64" y="${H - 28}" font-family="${fJa}" font-size="13" font-weight="700" fill="#a8a3c0">Milli Kit  •  Milli Linker</text>` +
     `<text x="${W - 28}" y="${H - 28}" font-family="${fJa}" font-size="10" font-weight="600" fill="#c8c6de" text-anchor="end">1200×630</text>` +

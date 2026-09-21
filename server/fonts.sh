@@ -3,16 +3,14 @@
 # $HOMEがビルド時と実行時で違う場合に備え、サービス内 ./fonts に同梱する
 set -eu
 mkdir -p fonts
+rm -f fonts/*.ttf
 cd fonts
-for u in \
-  "https://cdn.jsdelivr.net/fontsource/fonts/m-plus-rounded-1c@latest/japanese-800-normal.ttf" \
-  "https://cdn.jsdelivr.net/fontsource/fonts/m-plus-rounded-1c@latest/japanese-700-normal.ttf" \
-  "https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/japanese-700-normal.ttf" \
-  "https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/japanese-400-normal.ttf" \
-  "https://cdn.jsdelivr.net/fontsource/fonts/barlow@latest/latin-800-normal.ttf" \
-  ; do
-  curl -fSL -O "$u"
-done
+dl() { curl -fSL -o "$1" "$2"; }
+dl "rounded-800.ttf" "https://cdn.jsdelivr.net/fontsource/fonts/m-plus-rounded-1c@latest/japanese-800-normal.ttf"
+dl "rounded-700.ttf" "https://cdn.jsdelivr.net/fontsource/fonts/m-plus-rounded-1c@latest/japanese-700-normal.ttf"
+dl "noto-700.ttf" "https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/japanese-700-normal.ttf"
+dl "noto-400.ttf" "https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/japanese-400-normal.ttf"
+dl "barlow-800.ttf" "https://cdn.jsdelivr.net/fontsource/fonts/barlow@latest/latin-800-normal.ttf"
 cd ..
 DIR="$PWD/fonts"
 cat > fonts/fonts.conf <<EOF
