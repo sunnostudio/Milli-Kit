@@ -50,10 +50,12 @@ try {
 }
 
 const FANMARK_EMOJI = {
-  konomi:"🐺🍫", nono:"🎧🤍", akubi:"👿♠︎", koma:"⛩️🔅", raco:"🦦💛", yura:"🌙🫧",
-  nuhu:"🌈🖍️", tsukuri:"☁️🔧", liz:"🌂🖤", rei:"🩵🥽", mahoro:"🍓🦌", aoi:"🐢🌱",
-  nova:"🦦💛 / 🌙🫧 / 🌈🖍️ / 🐢🌱", uni:"☁️🔧 / 🌂🖤 / 🩵🥽", sona:"🎧🤍 / 👿♠︎ / 🍓🦌"
+  konomi:"", nono:"", akubi:"", koma:"", raco:"", yura:"",
+  nuhu:"", tsukuri:"", liz:"", rei:"", mahoro:"", aoi:"",
+  nova:"", uni:"", sona:""
 };
+// 元の絵文字はブラウザのカラー絵文字フォントが必要で、サーバーの Noto/M PLUS では豆腐化して
+// "01F/319" のように16進に化けるため、サーバー側では非表示にする。必要ならテキスト代替にできる。
 const GROUP_MEMBERS = {
   nova: ["raco","yura","nuhu","aoi"],
   uni: ["tsukuri","liz","rei"],
@@ -257,25 +259,21 @@ async function renderCardOgp(opts){
 
   // Text: name
   svg+=`<text x="${textX}" y="${nameY}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="${isEn?68:70}" font-weight="800" fill="#222">${escXml(name)}</text>`;
-  // shoulder
+  // shoulder — add extra line spacing to avoid overlap with subLine on server fonts
   if(shoulderTitle){
     svg+=`<text x="${textX}" y="${shoulderY}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="22" font-weight="600" fill="#6b6a7a">${escXml(shoulderTitle)}</text>`;
+    shoulderY += 4; // extra padding for server font metrics
   }
   // sub (x + oshiHistory)
   if(subLine){
-    svg+=`<text x="${textX}" y="${subY}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="20" font-weight="600" fill="#6b6a7a">${escXml(subLine)}</text>`;
+    // move subLine a bit lower when shoulder exists to avoid overlap
+    const subYAdj = shoulderTitle ? subY+6 : subY;
+    svg+=`<text x="${textX}" y="${subYAdj}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="20" font-weight="600" fill="#6b6a7a">${escXml(subLine)}</text>`;
   }
-  // fanMark + fanName + oshiMark
+  // fanMark + fanName + oshiMark + favCount + badge
   {
-    let fanY = (subLine? subY+30 : (shoulderTitle? shoulderY+26 : nameY+40));
-    // we need to do sequential x; for SVG we just place them spaced by estimating width
-    // Use tspan for simplicity: just join with spaces, but keep color separation via multiple <text>?
-    // We'll create separate <text> elements with dx
-    // For estimation, we skip precise measurement and just use same x with tspan colors? Simpler: single line with spaces, fanMark in #6b6a7a, oshiMark in color
-    // We'll do: if fanMarkEmojis, draw it, then fanName, then oshiMark
-    let curX=textX;
-    // We can't measure exactly, so we use approximate char width to offset next element
-    // Instead, we will use <tspan> inside single <text> with different fills
+    // use adjusted subY when shoulder exists (extra 6px added for server font)
+    let fy = subLine ? (shoulderTitle ? subY+44 : subY+38) : (shoulderTitle? shoulderY+34 : nameY+40);
     let tspan = "";
     if(fanMarkEmojis){
       tspan += `<tspan fill="#6b6a7a">${escXml(fanMarkEmojis)}</tspan><tspan dx="10"></tspan>`;
@@ -287,61 +285,48 @@ async function renderCardOgp(opts){
       tspan += `<tspan fill="${escXml(color)}">${escXml(oshiMark)}</tspan>`;
     }
     if(tspan){
-      // Determine fanY
-      // fanY is subY+8 or similar; compute
-      let fy = subLine ? subY+38 : (shoulderTitle? shoulderY+30 : nameY+40);
-      // Adjust for font size 34/32
       svg+=`<text x="${textX}" y="${fy}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="${isEn?32:34}" font-weight="700">${tspan}</text>`;
-      // favCount handling
-      if(favCount>0){
-        if(ultimate==="nova"){
-          svg+=`<text x="${textX}" y="${fy+30}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="20" font-weight="600" fill="#6b6a7a">${escXml(`他${favCount}推し`)}</text>`;
-        } else {
-          // place after fan line: we approximate x offset as 20*length of previous, but just place after with dx
-          // For simplicity, append to same line with spacing
-          svg+=`<text x="${textX}" y="${fy}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="20" font-weight="600" fill="#6b6a7a"><tspan dx="8">${escXml(`他${favCount}推し`)}</tspan></text>`;
-          // Note: this will be slightly misaligned but okay
-        }
+    }
+    // favCount — novaは改行
+    if(favCount>0){
+      if(ultimate==="nova"){
+        svg+=`<text x="${textX}" y="${fy+30}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="20" font-weight="600" fill="#6b6a7a">${escXml(`他${favCount}推し`)}</text>`;
+      } else if(tspan){
+        svg+=`<text x="${textX}" y="${fy}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="20" font-weight="600" fill="#6b6a7a"><tspan dx="8">${escXml(`他${favCount}推し`)}</tspan></text>`;
+      } else {
+        svg+=`<text x="${textX}" y="${fy}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="20" font-weight="600" fill="#6b6a7a">${escXml(`他${favCount}推し`)}</text>`;
       }
-      // badge
-      if(m){
-        let wrapExtra = (ultimate==="nova" && favCount>0) ? 30 : 0;
-        let badgeY = fy+34+wrapExtra;
-        const padX=16, bw=badgeW, bh=30;
-        const bx=textX, by=badgeY-20;
-        svg+=`<rect x="${bx}" y="${by}" rx="15" ry="15" width="${bw}" height="${bh}" fill="${escXml(color)}"/>`;
-        svg+=`<text x="${bx+padX}" y="${by+20}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="${isEn?18:19}" font-weight="800" fill="#fff">${escXml(badgeText)}</text>`;
-        // birthday pill
-        if(birthday && birthdayPublic!=="hidden"){
-          const mm=birthday.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-          if(mm){
-            const bdayText = birthdayPublic==="full" ? `${mm[1]}/${mm[2]}/${mm[3]}` : `${mm[2]}/${mm[3]}`;
-            // estimate width
-            const iconW=14;
-            const bPadX=10;
-            // approximate measure for bdayText: assume 10px per char
-            const bTw = bdayText.length*9;
-            const bW = bTw+iconW+6+bPadX*2, bH=26;
-            const bX=bx+bw+10, bY=by+2;
-            // pill bg
-            svg+=`<rect x="${bX}" y="${bY}" rx="13" ry="13" width="${bW}" height="${bH}" fill="#fff" stroke="${escXml(color)}" stroke-opacity="0.27" stroke-width="1.5"/>`;
-            // simple cake icon as text 🎂
-            svg+=`<text x="${bX+bPadX+7}" y="${bY+17}" font-size="11" text-anchor="middle">🎂</text>`;
-            svg+=`<text x="${bX+bPadX+iconW+6}" y="${bY+17}" font-family="${escXml(fontJa)}" font-size="14" font-weight="700" fill="#6b6a7a">${escXml(bdayText)}</text>`;
-          }
-        }
-      } else if(birthday && birthdayPublic!=="hidden"){
+    }
+    // badge + birthday — tspanが空でも表示（グループでfanName無しでもバッジは出す）
+    if(m){
+      let wrapExtra = (ultimate==="nova" && favCount>0) ? 30 : 0;
+      let badgeY = fy+34+wrapExtra;
+      // tspanが空でsubLineも肩書きも無い場合の微調整は不要だが、fyが既に計算済みなのでそのまま
+      const padX=16, bw=badgeW, bh=30;
+      const bx=textX, by=badgeY-20;
+      svg+=`<rect x="${bx}" y="${by}" rx="15" ry="15" width="${bw}" height="${bh}" fill="${escXml(color)}"/>`;
+      svg+=`<text x="${bx+padX}" y="${by+20}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="${isEn?18:19}" font-weight="800" fill="#fff">${escXml(badgeText)}</text>`;
+      if(birthday && birthdayPublic!=="hidden"){
         const mm=birthday.match(/^(\d{4})-(\d{2})-(\d{2})$/);
         if(mm){
           const bdayText = birthdayPublic==="full" ? `${mm[1]}/${mm[2]}/${mm[3]}` : `${mm[2]}/${mm[3]}`;
-          let fy2 = subLine ? subY+38 : (shoulderTitle? shoulderY+30 : nameY+40);
-          let badgeY = fy2+34 + ((ultimate==="nova"&&favCount>0)?30:0);
           const iconW=14, bPadX=10, bTw=bdayText.length*9, bW=bTw+iconW+6+bPadX*2, bH=26;
-          const bX=textX, bY=badgeY-20+2;
+          const bX=bx+bw+10, bY=by+2;
           svg+=`<rect x="${bX}" y="${bY}" rx="13" ry="13" width="${bW}" height="${bH}" fill="#fff" stroke="${escXml(color)}" stroke-opacity="0.27" stroke-width="1.5"/>`;
           svg+=`<text x="${bX+bPadX+7}" y="${bY+17}" font-size="11" text-anchor="middle">🎂</text>`;
           svg+=`<text x="${bX+bPadX+iconW+6}" y="${bY+17}" font-family="${escXml(fontJa)}" font-size="14" font-weight="700" fill="#6b6a7a">${escXml(bdayText)}</text>`;
         }
+      }
+    } else if(birthday && birthdayPublic!=="hidden"){
+      const mm=birthday.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if(mm){
+        const bdayText = birthdayPublic==="full" ? `${mm[1]}/${mm[2]}/${mm[3]}` : `${mm[2]}/${mm[3]}`;
+        let badgeY = fy+34 + ((ultimate==="nova"&&favCount>0)?30:0);
+        const iconW=14, bPadX=10, bTw=bdayText.length*9, bW=bTw+iconW+6+bPadX*2, bH=26;
+        const bX=textX, bY=badgeY-20+2;
+        svg+=`<rect x="${bX}" y="${bY}" rx="13" ry="13" width="${bW}" height="${bH}" fill="#fff" stroke="${escXml(color)}" stroke-opacity="0.27" stroke-width="1.5"/>`;
+        svg+=`<text x="${bX+bPadX+7}" y="${bY+17}" font-size="11" text-anchor="middle">🎂</text>`;
+        svg+=`<text x="${bX+bPadX+iconW+6}" y="${bY+17}" font-family="${escXml(fontJa)}" font-size="14" font-weight="700" fill="#6b6a7a">${escXml(bdayText)}</text>`;
       }
     }
   }
