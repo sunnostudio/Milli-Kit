@@ -182,12 +182,23 @@ function initIcon(){
   function updateIconPreview(){
     const v=input.value.trim();
     if(!v){ preview.innerHTML=`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#icon-user"/></svg>`; return; }
-    if(v.startsWith("http") || v.startsWith("data:")){
+    if(v.startsWith("https://") || v.startsWith("data:image/")){
+      // validate https URL strictly
+      if(v.startsWith("https://")){
+        try{ const u=new URL(v); if(u.protocol!=="https:") { preview.textContent=v.slice(0,2); return; } }catch(e){ preview.textContent=v.slice(0,2); return; }
+      }
+      // escape properly
       preview.innerHTML=`<img src="${escAttr(v)}" alt="">`;
+    } else if(v.startsWith("http://")||v.startsWith("data:")){
+      // block http or non-image data, treat as text
+      preview.textContent=v.slice(0,2);
+      return;
     } else {
       preview.textContent=v.slice(0,2);
     }
   }
+  window.updateIconPreview = updateIconPreview;
+  window._updateIconPreview = updateIconPreview;
   updateIconPreview();
 }
 function isValidXHandle(h){ return /^[A-Za-z0-9_]{1,15}$/.test(h); }
@@ -315,6 +326,10 @@ function initSns(){
   const add=document.getElementById("addSnsBtn");
   if(!list||!add) return;
   add.addEventListener("click", ()=> addRow());
+  // single delegated listener for closing dropdowns (fix M8 leak)
+  document.addEventListener("click", ()=>{
+    document.querySelectorAll("#snsList .custom-select.open").forEach(r=>r.classList.remove("open"));
+  });
   addRow();
   function addRow(pref={}){
     const row=document.createElement("div");
@@ -349,7 +364,6 @@ function initSns(){
     if(pref.type && root){ root.dataset.value=pref.type; }
     if(memo) memo.addEventListener("input", ()=>{ getDebouncedPreview()(); saveDraft(); });
     row.querySelector(".sns-remove").addEventListener("click", ()=>{ row.remove(); getDebouncedPreview()(); saveDraft(); });
-    document.addEventListener("click", ()=> root.classList.remove("open"));
     list.appendChild(row);
   }
   window._addSnsRow = addRow;
@@ -524,11 +538,13 @@ function initGallery(){
     if(grid.children.length>=6) return;
     const card=document.createElement("div");
     card.className="gallery-card";
-    card.dataset.url=pref.url||"";
-    const hasImg=!!pref.url;
+    // validate gallery url - only https or data:image allowed
+    const safeUrl = (pref.url && (typeof isValidGalleryIconUrl==="function" ? isValidGalleryIconUrl(pref.url) : /^https:\/\//.test(pref.url) || pref.url.startsWith("data:image/"))) ? pref.url : "";
+    card.dataset.url=safeUrl;
+    const hasImg=!!safeUrl;
     card.innerHTML=`
       <div class="gallery-thumb">
-        ${hasImg?`<img src="${escAttr(pref.url)}" alt="">`:`<div class="gallery-placeholder">画像<br><span style="font-size:10px;">クリックで選択</span></div>`}
+        ${hasImg?`<img src="${escAttr(safeUrl)}" alt="">`:`<div class="gallery-placeholder">画像<br><span style="font-size:10px;">クリックで選択</span></div>`}
         ${hasImg?`<button type="button" class="gallery-remove" aria-label="削除">×</button>`:""}
         <div class="gallery-progress" style="display:none"><div class="gallery-progress-bar"></div></div>
       </div>
@@ -538,8 +554,6 @@ function initGallery(){
       </div>
     `;
     const thumb=card.querySelector(".gallery-thumb");
-    const progress=card.querySelector(".gallery-progress");
-    const bar=card.querySelector(".gallery-progress-bar");
     const fileInput=card.querySelector('input[type="file"]');
     const commentInput=card.querySelector(".gallery-comment");
     const removeBtn=card.querySelector(".gallery-remove");
@@ -561,13 +575,19 @@ function initGallery(){
       // validate
       if(!file.type.startsWith("image/")){ alert("画像ファイルを選んでください"); return; }
       if(file.size>5*1024*1024){ alert("画像は5MBまでにしてください"); return; }
-      // show progress
-      progress.style.display="block"; bar.style.width="0%";
+      // show progress - re-query inside handler to avoid stale refs after thumb.innerHTML replacement (M5)
+      const progressEl=card.querySelector(".gallery-progress");
+      const barEl=card.querySelector(".gallery-progress-bar");
+      if(progressEl) progressEl.style.display="block"; if(barEl) barEl.style.width="0%";
       try{
         let resUrl="";
         if(typeof isCloudinaryConfigured==="function" && isCloudinaryConfigured() && typeof uploadToCloudinary==="function"){
-          const res=await uploadToCloudinary(file, (pct)=>{ bar.style.width=pct+"%"; });
+          const res=await uploadToCloudinary(file, (pct)=>{ const b=card.querySelector(".gallery-progress-bar"); if(b) b.style.width=pct+"%"; });
           resUrl=res.url;
+          // validate returned url is https
+          if(resUrl && !(resUrl.startsWith("https://")||resUrl.startsWith("data:image/"))){
+            try{ const u=new URL(resUrl); if(u.protocol!=="https:") throw new Error("Invalid URL"); }catch(e){ throw new Error("不正な画像URLです"); }
+          }
         } else {
           // fallback: dataURL (local only, share時は表示されない旨を注記済み)
           resUrl=await new Promise((res, rej)=>{
@@ -587,10 +607,12 @@ function initGallery(){
           thumb.innerHTML=`<div class="gallery-placeholder">画像<br><span style="font-size:10px;">クリックで選択</span></div><div class="gallery-progress" style="display:none"><div class="gallery-progress-bar"></div></div>`;
           saveDraft(); getDebouncedPreview()();
         });
-        progress.style.display="none";
+        const progAfter=card.querySelector(".gallery-progress");
+        if(progAfter) progAfter.style.display="none";
         saveDraft(); getDebouncedPreview()();
       }catch(err){
-        progress.style.display="none";
+        const progErr=card.querySelector(".gallery-progress");
+        if(progErr) progErr.style.display="none";
         alert(err.message||"アップロードに失敗しました");
       }
       fileInput.value="";
@@ -631,11 +653,23 @@ function isValidXHandleStrict(h){ return /^[A-Za-z0-9_]{1,15}$/.test(h); }
 function snsToUrl(type, raw){
   raw=(raw||"").trim();
   if(!raw) return "";
-  if(/^https?:\/\//.test(raw)){
-    if(type==="x"){
-      try{ const u=new URL(raw); const hd=u.pathname.split("/")[1]||""; if(!isValidXHandleStrict(hd)) return ""; }catch(e){ return ""; }
-    }
-    return raw;
+  if(/^https?:\/\//i.test(raw)){
+    try{
+      const u=new URL(raw);
+      if(u.protocol!=="https:") return "";
+      if(type==="x"){
+        const hd=u.pathname.split("/")[1]||""; if(!isValidXHandleStrict(hd)) return "";
+      }
+      if(type==="other"||type==="line"){
+        // explicitly validate https for these types
+        if(u.protocol!=="https:") return "";
+      }
+      // gallery/icon-like URLs also must be https
+      if(type==="gallery"||type==="icon"){
+        if(u.protocol!=="https:" && u.protocol!=="data:") return "";
+      }
+      return u.href;
+    }catch(e){ return ""; }
   }
   if(type==="x"){
     const hd=raw.replace(/^@/,"").split("/")[0].split("?")[0];
@@ -646,26 +680,57 @@ function snsToUrl(type, raw){
     // allow @name, name#1234, or invite code
     if(raw.startsWith("@")) return `https://discord.com/users/${encodeURIComponent(raw.slice(1))}`;
     if(/^\d{17,20}$/.test(raw)) return `https://discord.com/users/${raw}`;
-    if(raw.includes("discord.gg/")) return `https://${raw.replace(/^https?:\/\//,"")}`;
+    if(raw.includes("discord.gg/")){
+      try{ const u=new URL(`https://${raw.replace(/^https?:\/\//,"")}`); if(u.protocol!=="https:") return ""; return u.href; }catch(e){ return ""; }
+    }
     return `https://discord.com/users/${encodeURIComponent(raw)}`;
   }
   if(type==="youtube"){
     if(/^[A-Za-z0-9_-]{11}$/.test(raw)) return `https://www.youtube.com/watch?v=${raw}`;
     if(raw.startsWith("@")) return `https://www.youtube.com/${raw}`;
-    return `https://${raw.replace(/^https?:\/\//,"")}`;
+    try{ const u=new URL(`https://${raw.replace(/^https?:\/\//,"")}`); if(u.protocol!=="https:") return ""; return u.href; }catch(e){ return ""; }
   }
   if(type==="instagram"){
     if(raw.startsWith("@")) return `https://www.instagram.com/${raw.slice(1)}`;
-    return raw.includes("instagram.com") ? `https://${raw.replace(/^https?:\/\//,"")}` : `https://www.instagram.com/${encodeURIComponent(raw)}`;
+    if(raw.includes("instagram.com")){
+      try{ const u=new URL(`https://${raw.replace(/^https?:\/\//,"")}`); if(u.protocol!=="https:") return ""; return u.href; }catch(e){ return ""; }
+    }
+    return `https://www.instagram.com/${encodeURIComponent(raw)}`;
   }
   if(type==="tiktok"){
     if(raw.startsWith("@")) return `https://www.tiktok.com/${raw}`;
-    return raw.includes("tiktok.com") ? `https://${raw.replace(/^https?:\/\//,"")}` : `https://www.tiktok.com/${encodeURIComponent(raw)}`;
+    if(raw.includes("tiktok.com")){
+      try{ const u=new URL(`https://${raw.replace(/^https?:\/\//,"")}`); if(u.protocol!=="https:") return ""; return u.href; }catch(e){ return ""; }
+    }
+    return `https://www.tiktok.com/${encodeURIComponent(raw)}`;
   }
   if(type==="line"){
-    return raw.includes("line.me") ? `https://${raw.replace(/^https?:\/\//,"")}` : raw;
+    if(raw.includes("line.me")){
+      try{ const u=new URL(`https://${raw.replace(/^https?:\/\//,"")}`); if(u.protocol!=="https:") return ""; return u.href; }catch(e){ return ""; }
+    }
+    try{ const u=new URL(raw); if(u.protocol==="https:") return u.href; }catch(e){}
+    try{ const u=new URL(`https://${raw}`); if(u.protocol==="https:") return u.href; }catch(e){}
+    return "";
+  }
+  if(type==="other"){
+    try{ const u=new URL(raw); if(u.protocol==="https:") return u.href; }catch(e){}
+    try{ const u=new URL(`https://${raw}`); if(u.protocol==="https:") return u.href; }catch(e){}
+    return "";
+  }
+  // gallery/icon fallback
+  if(type==="gallery"||type==="icon"){
+    try{ const u=new URL(raw); if(u.protocol==="https:"||u.protocol==="data:") return u.href||raw; }catch(e){}
+    return "";
   }
   return raw;
+}
+function isValidHttpsUrl(u){
+  try{ const x=new URL(u); return x.protocol==="https:"; }catch(e){ return false; }
+}
+function isValidGalleryIconUrl(u){
+  if(!u) return false;
+  if(u.startsWith("data:image/")) return true;
+  try{ const x=new URL(u); return x.protocol==="https:"; }catch(e){ return false; }
 }
 function formatBirthday(bday, pub){
   if(!bday || pub==="hidden") return "";
@@ -793,10 +858,11 @@ function updatePreview(){
   const birthday=document.getElementById("fieldBirthday")?.value||"";
   const birthdayPublic=document.querySelector('.custom-select[data-name="birthdayPublic"]')?.dataset.value||"monthDay";
   const birthdayText=formatBirthday(birthday, birthdayPublic);
-  const galleryRows=(typeof window._getGalleryData==="function" ? window._getGalleryData() : [...document.querySelectorAll("#galleryGrid .gallery-card")].map(c=> ({
+  const _rawGallery=(typeof window._getGalleryData==="function" ? window._getGalleryData() : [...document.querySelectorAll("#galleryGrid .gallery-card")].map(c=> ({
     url: c.dataset.url||"",
     comment: c.querySelector(".gallery-comment")?.value||""
   })).filter(x=>x.url));
+  const galleryRows=_rawGallery.filter(g=> typeof isValidGalleryIconUrl==="function" ? isValidGalleryIconUrl(g.url) : (g.url.startsWith("https://")||g.url.startsWith("data:image/")));
 
   const mUltimate = (typeof LINKER_MEMBERS!=="undefined") ? LINKER_MEMBERS.find(x=>x.id===ultimate) : null;
   const color = mUltimate ? mUltimate.color : "#7f7efd";
@@ -815,6 +881,9 @@ function updatePreview(){
     const memo=r.querySelector(".sns-memo")?.value.trim()||"";
     if(!t||!u) return null;
     const url=snsToUrl(t,u);
+    if(!url) return null;
+    // additionally ensure https
+    if(typeof isValidHttpsUrl==="function" && !isValidHttpsUrl(url)) return null;
     const label=SNS_TYPES.find(x=>x.v===t)?.label||t;
     let iconHtml="";
     if(t==="wick"){
@@ -824,10 +893,10 @@ function updatePreview(){
       iconHtml=`<svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><use href="#${iconId}"/></svg>`;
     }
     return {type:t, url, label, memo, iconHtml};
-  }).filter(Boolean);
+  }).filter(s=>s && s.url);
   if(xUrlRaw){
     const xUrlNorm=snsToUrl("x", xUrlRaw);
-    if(xUrlNorm){
+    if(xUrlNorm && (typeof isValidHttpsUrl!=="function" || isValidHttpsUrl(xUrlNorm))){
       const xIcon=`<svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-x"/></svg>`;
       snsFromRows.unshift({type:"x", url:xUrlNorm, label:"X", memo:"", iconHtml:xIcon});
     }
@@ -883,9 +952,10 @@ function updatePreview(){
   }
   const birthdayHtml=birthdayText?`<span style="display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid #e5e3f2;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700;color:#6b6a7a;">${birthdayIconSvg(12)} ${esc(birthdayText)}</span>`:"";
 
+  const iconIsImg = typeof isValidGalleryIconUrl==="function" ? isValidGalleryIconUrl(icon) : (icon.startsWith("https://")||icon.startsWith("data:image/"));
   card.innerHTML=`
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-      <span style="width:36px;height:36px;border-radius:50%;background:#fff;border:1px solid #e5e3f2;display:grid;place-items:center;overflow:hidden;">${icon.startsWith("http")||icon.startsWith("data:")?`<img src="${escAttr(icon)}" style="width:100%;height:100%;object-fit:cover">`:`<span>${esc(icon||"？")}</span>`}</span>
+      <span style="width:36px;height:36px;border-radius:50%;background:#fff;border:1px solid #e5e3f2;display:grid;place-items:center;overflow:hidden;">${iconIsImg?`<img src="${escAttr(icon)}" style="width:100%;height:100%;object-fit:cover">`:`<span>${esc(icon||"？")}</span>`}</span>
       <span><b>${esc(name)}</b> ${shoulder?`<span style="font-size:11px;color:#6b6a7a;font-weight:700;margin-left:6px;">${esc(shoulder)}</span>`:""} ${mUltimate?`<span style="background:${color};color:#fff;padding:2px 8px;border-radius:999px;font-size:11px;">最推し ${esc(mUltimate.name)}</span>`:""} ${birthdayHtml}</span>
     </div>
     ${snsRows?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 8px;">${snsRows}</div>`:""}
@@ -903,7 +973,7 @@ function updatePreview(){
     // fallback: canvas未読込時の簡易プレビュー — talent-based
     ogp.innerHTML=`<div style="width:100%;height:100%;display:grid;place-items:center;background:linear-gradient(135deg, ${color} 0%, ${btnLight} 100%);color:#fff;border-radius:12px;padding:12px;text-align:center;">
       <div style="background:rgba(255,255,255,.92);color:#222;border-radius:12px;padding:10px 14px;display:inline-flex;align-items:center;gap:8px;">
-        <span style="width:28px;height:28px;border-radius:50%;background:#fff;border:1px solid #e5e3f2;display:grid;place-items:center;overflow:hidden;">${icon.startsWith("http")||icon.startsWith("data:")?`<img src="${escAttr(icon)}" style="width:100%;height:100%;object-fit:cover">`:`<span>${esc(icon||"？")}</span>`}</span>
+        <span style="width:28px;height:28px;border-radius:50%;background:#fff;border:1px solid #e5e3f2;display:grid;place-items:center;overflow:hidden;">${iconIsImg?`<img src="${escAttr(icon)}" style="width:100%;height:100%;object-fit:cover">`:`<span>${esc(icon||"？")}</span>`}</span>
         <b>${esc(name)}</b> <span style="font-size:11px;background:${color};color:#fff;padding:2px 6px;border-radius:999px;">${mUltimate?esc(mUltimate.name):""}</span>
       </div>
       <div style="font-size:10px;opacity:.9;">1200×630 OGP プレビュー</div>
@@ -969,7 +1039,7 @@ function loadDraft(){
     const d=JSON.parse(raw);
     if(d.name) document.getElementById("fieldName").value=d.name;
     if(d.title) document.getElementById("fieldTitle").value=d.title;
-    if(d.icon) document.getElementById("fieldIcon").value=d.icon;
+    if(d.icon) { document.getElementById("fieldIcon").value=d.icon; if(typeof window.updateIconPreview==="function") window.updateIconPreview(); else if(typeof window._updateIconPreview==="function") window._updateIconPreview(); }
     if(d.ultimate) { const w=document.getElementById("oshiUltimate"); w.dataset.value=d.ultimate; w.querySelectorAll(".custom-opt").forEach(b=> b.classList.toggle("active", b.dataset.id===d.ultimate)); }
     if(d.favs && Array.isArray(d.favs)){
       d.favs.forEach(id=>{
@@ -1049,13 +1119,20 @@ function loadDraft(){
         for(let i=0;i<remain;i++) window._addGalleryCard && window._addGalleryCard({});
       }
     }
+    // M2: update counters after load
+    [["fieldName","countName"],["fieldTitle","countTitle"],["fieldFree","countFree"]].forEach(([fid,cid])=>{
+      const inp=document.getElementById(fid), cnt=document.getElementById(cid);
+      if(inp&&cnt) cnt.textContent=String(inp.value.length);
+    });
+    // M1: ensure icon preview already updated above; also handle case where icon empty
+    if(!d.icon && typeof window.updateIconPreview==="function") window.updateIconPreview();
     syncFavDisable();
     const kamiPrev=document.getElementById("kamiPreview"); if(kamiPrev) kamiPrev.style.display="flex";
     updatePreview();
   }catch(e){}
 }
 function esc(s){ return String(s).replace(/[&<>"']/g, c=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function escAttr(s){ return String(s).replace(/"/g,'&quot;'); }
+function escAttr(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function collectPayload(){
   const kamiRows=[...document.querySelectorAll("#kamiList .media-item")].map(r=> ({
@@ -1242,8 +1319,8 @@ function initSave(){
     resetBtn.style.touchAction="manipulation";
     resetBtn.style.webkitTapHighlightColor="transparent";
   }
-  // 公開ボタンも同様に touchend 対応（ログイン誘導がX内ブラウザでも確実に開くように）
-  function onSave(e){
+  // 公開ボタンも同様に touchend 対応（ログイン誘導がX内ブラウザでも確実に開くように） C4: async publish with error handling
+  async function onSave(e){
     if(e && e.type==="touchend" && e.cancelable) e.preventDefault();
     saveDraft();
     const payload=collectPayload();
@@ -1268,19 +1345,30 @@ function initSave(){
     let uid=null;
     try{
       if(typeof getMilliproUid==="function") uid=getMilliproUid();
-      if(!uid && typeof firebase!=="undefined" && firebase.auth().currentUser) uid=firebase.auth().currentUser.uid;
+      if(!uid && typeof firebase!=="undefined" && firebase.auth && firebase.auth().currentUser) uid=firebase.auth().currentUser.uid;
     }catch(e){}
     if(!uid){
       showLoginRequiredModal();
       return;
     }
     payload.uid=uid;
+    // C4: await firebase set, show error on failure, don't show modal on failure
+    const origText = btn ? btn.textContent : "";
+    const origText2 = btn2 ? btn2.textContent : "";
+    if(btn) btn.disabled=true;
+    if(btn2) btn2.disabled=true;
     try{
-      firebase.database().ref(`millipro/linker/${uid}`).set(payload).catch(e=> console.warn(e));
-    }catch(e){ console.warn(e); }
+      await firebase.database().ref(`millipro/linker/${uid}`).set(payload);
+    }catch(err){
+      console.warn(err);
+      alert("公開に失敗しました: "+(err && err.message ? err.message : String(err))+"\n通信環境を確認して再度お試しください。下書きは保存されています。");
+      if(btn) btn.disabled=false;
+      if(btn2) btn2.disabled=false;
+      return;
+    }
+    if(btn){ btn.disabled=false; btn.textContent="公開しました"; setTimeout(()=> btn.textContent=origText, 1500); }
+    if(btn2){ btn2.disabled=false; btn2.textContent="公開しました"; setTimeout(()=> btn2.textContent=origText2, 1500); }
     const link = `${location.origin}/linker/view.html?uid=${uid}`;
-    if(btn) { const orig=btn.textContent; btn.textContent="公開しました"; setTimeout(()=> btn.textContent=orig, 1500); }
-    if(btn2){ const orig2=btn2.textContent; btn2.textContent="公開しました"; setTimeout(()=> btn2.textContent=orig2, 1500); }
     showShareModal(link, payload);
   }
   if(btn){

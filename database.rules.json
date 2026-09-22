@@ -23,8 +23,8 @@
         "$pid": {
           "$videoId": {
             "$date": {
-              ".read": true,
-              ".write": true,
+              ".read": "auth != null",
+              ".write": "auth != null",
               ".validate": "newData.hasChildren(['watchedAt'])"
             }
           }
@@ -37,33 +37,71 @@
           ".validate": "newData.hasChildren(['name', 'ultimate'])",
           "name": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 20" },
           "title": { ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 20)" },
-          "icon": { ".validate": "newData.isString() && newData.val().length <= 2000000" },
-          "ultimate": { ".validate": "newData.isString()" },
-          "favs": { ".validate": "newData.isArray() || !newData.exists()" },
-          "kamiRows": { ".validate": "!newData.exists() || newData.hasChildren()" },
-          "songRows": { ".validate": "!newData.exists() || newData.hasChildren()" },
-          "free": { ".validate": "!newData.exists() || newData.isString()" },
-          "oshiHistory": { ".validate": "!newData.exists() || newData.isString()" },
-          "oshiMark": { ".validate": "!newData.exists() || newData.isString()" },
-          "ogpFontJa": { ".validate": "!newData.exists() || newData.isString()" },
-          "ogpFontEn": { ".validate": "!newData.exists() || newData.isString()" },
-          "xUrl": { ".validate": "!newData.exists() || newData.isString()" },
-          "sns": { ".validate": "!newData.exists() || newData.hasChildren()" },
+          "icon": { ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 2000000)" },
+          "ultimate": { ".validate": "newData.isString() && newData.val().matches(/^(konomi|nono|akubi|koma|raco|yura|nuhu|tsukuri|liz|rei|mahoro|aoi|nova|uni|sona)$/)" },
+          "favs": {
+            ".validate": "!newData.exists() || (newData.numChildren() <= 20 && !newData.isString() && !newData.isNumber() && !newData.isBoolean())",
+            "$idx": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 20 && newData.val().matches(/^[a-z0-9]+$/)" }
+          },
+          "kamiRows": {
+            ".validate": "!newData.exists() || (newData.hasChildren() && newData.numChildren() <= 6)",
+            "$idx": {
+              ".validate": "newData.hasChildren(['url'])",
+              "url": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 500" },
+              "comment": { ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 80)" },
+              "start": { ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 10)" },
+              "title": { ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 100)" },
+              "author": { ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 100)" },
+              "$other": { ".validate": false }
+            }
+          },
+          "songRows": {
+            ".validate": "!newData.exists() || (newData.hasChildren() && newData.numChildren() <= 6)",
+            "$idx": {
+              ".validate": "newData.hasChildren(['url'])",
+              "url": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 500" },
+              "comment": { ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 80)" },
+              "title": { ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 100)" },
+              "author": { ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 100)" },
+              "$other": { ".validate": false }
+            }
+          },
+          "free": { ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 200)" },
+          "oshiHistory": { ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 20)" },
+          "oshiMark": { ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 10)" },
+          "ogpFontJa": { ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 200)" },
+          "ogpFontEn": { ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 200)" },
+          "xUrl": { ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 500)" },
+          "sns": {
+            ".validate": "!newData.exists() || (newData.hasChildren() && newData.numChildren() <= 6)",
+            "$idx": {
+              ".validate": "newData.hasChildren(['type', 'url'])",
+              "type": { ".validate": "newData.isString() && newData.val().matches(/^(x|youtube|discord|instagram|tiktok|wick|line|other)$/)" },
+              "url": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 500" },
+              "memo": { ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 30)" },
+              "$other": { ".validate": false }
+            }
+          },
           "birthday": { ".validate": "!newData.exists() || (newData.isString() && (newData.val() == '' || newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)))" },
-          "birthdayPublic": { ".validate": "!newData.exists() || newData.isString()" },
+          "birthdayPublic": { ".validate": "!newData.exists() || (newData.isString() && newData.val().matches(/^(hidden|monthDay|full)$/))" },
           "gallery": {
-            ".validate": "!newData.exists() || newData.hasChildren()",
-            "$idx": { ".validate": "newData.hasChildren(['url'])" }
+            ".validate": "!newData.exists() || (newData.hasChildren() && newData.numChildren() <= 6)",
+            "$idx": {
+              ".validate": "newData.hasChildren(['url'])",
+              "url": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 2000" },
+              "comment": { ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 40)" },
+              "$other": { ".validate": false }
+            }
           },
           "updatedAt": { ".validate": "newData.isNumber()" },
-          "$other": { ".validate": true }
+          "$other": { ".validate": false }
         }
       },
       "cards": {
         "$uid": {
           ".read": true,
           ".write": "auth != null && auth.uid == $uid",
-          ".validate": true
+          ".validate": "newData.hasChildren() && newData.numChildren() <= 20"
         }
       }
     }

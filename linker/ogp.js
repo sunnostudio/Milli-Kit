@@ -2,6 +2,8 @@
 // White bg, oshi color, bigger name/icon/fanName/logos, fanMark as 2 emojis, site = Milli Linker, optional shoulder title
 "use strict";
 function ogpDebounce(fn, ms){ let t=null; return function(...a){ clearTimeout(t); t=setTimeout(()=>fn.apply(this,a), ms); }; }
+// FANMARK_EMOJI: クライアントではカラー絵文字を表示。サーバー(server/index.js)は豆腐化回避のため空白を意図的に維持。
+// 差異は仕様でありバグではない — OGPはバッジ/fanNameで識別性を担保。
 const FANMARK_EMOJI = {
   konomi:"🐺🍫", nono:"🎧🤍", akubi:"👿♠︎", koma:"⛩️🔅", raco:"🦦💛", yura:"🌙🫧",
   nuhu:"🌈🖍️", tsukuri:"☁️🔧", liz:"🌂🖤", rei:"🩵🥽", mahoro:"🍓🦌", aoi:"🐢🌱",
@@ -67,7 +69,7 @@ async function drawOgpToCanvas(canvas, opts){
   const ultimateLogoUrl=opts.ultimateLogoUrl||"";
   const talentImgUrl=opts.talentImgUrl||"";
   const birthday=opts.birthday||"", birthdayPublic=opts.birthdayPublic||"monthDay";
-  const gallery=Array.isArray(opts.gallery)?opts.gallery.slice(0,3):[];
+  const gallery=Array.isArray(opts.gallery)?opts.gallery.slice(0,3):[]; // NOTE: gallery is reserved for future OGP gallery rendering; currently not drawn (watermark uses talent image instead). Kept for API compatibility.
   const m=getMemberById(ultimate); const color=m?m.color:"#7f7efd";
   const subColor=m? (m.subColor||color+"22") : "#e5e3f2";
   let fanName=""; try{ const full=(typeof MEMBERS!=="undefined"?MEMBERS.find(x=>x.id===ultimate):null); if(full) fanName=full.fanName||""; }catch(e){} if(!fanName && m) fanName=m.fanName||"";
@@ -206,7 +208,7 @@ async function drawOgpToCanvas(canvas, opts){
     ctx.save(); ctx.globalAlpha=1.0;
     const tw=420, th=460;
     const tx=W - tw - 18, ty=H - th - 18;
-    const scale=Math.max(tw/talentImgForWatermark.width, th/talentImgForWatermark.height);
+    const scale=Math.min(tw/talentImgForWatermark.width, th/talentImgForWatermark.height); // FIX: was Math.max (cover) but should be Math.min (inside) to fit within box; cover would require cropping
     const dw=talentImgForWatermark.width*scale, dh=talentImgForWatermark.height*scale;
     const dx=tx + tw/2 - dw/2;
     const yOff2 = ultimate==="aoi" ? 26 : (ultimate==="tsukuri" || ultimate==="tukuri" ? 14 : 0);
@@ -231,13 +233,33 @@ async function drawOgpToCanvas(canvas, opts){
 
   const textX=iconX+iconR*2+32;
   const isEn=/^[\x00-\x7F]*$/.test(name) && /[A-Za-z]/.test(name);
-  // Name
+  // Name — overflow handling: shrink font or truncate with ... if too long (measureText)
   ctx.fillStyle="#222"; ctx.textAlign="left"; ctx.textBaseline="alphabetic";
-  const nameFont=isEn?`800 68px ${fontEn}`:`800 70px ${fontJa}`;
-  ctx.font=nameFont;
   const nameY=168;
-  ctx.fillText(name, textX, nameY);
-  // Shoulder title
+  const availableNameW = W - textX - 32 - 8;
+  (function(){
+    let display = String(name);
+    let size = isEn ? 68 : 70;
+    const fontFor = (sz)=> isEn ? `800 ${sz}px ${fontEn}` : `800 ${sz}px ${fontJa}`;
+    ctx.font = fontFor(size);
+    let w = ctx.measureText(display).width;
+    while(w > availableNameW && size > 36){
+      size -= 4;
+      ctx.font = fontFor(size);
+      w = ctx.measureText(display).width;
+    }
+    if(w > availableNameW){
+      const ell="...";
+      const ellW = ctx.measureText(ell).width;
+      while(display.length>1 && ctx.measureText(display).width + ellW > availableNameW){
+        display = display.slice(0, -1);
+      }
+      display = display + ell;
+    }
+    ctx.font = fontFor(size);
+    ctx.fillText(display, textX, nameY);
+  })();
+  // Shoulder title — verified overlap fix: shoulderY+18 and subY offset ensures no overlap with subLine (see server/index.js same logic)
   let shoulderY=nameY+26;
   if(shoulderTitle){
     ctx.font=isEn?`600 22px ${fontEn}`:`600 22px ${fontJa}`;
@@ -277,7 +299,7 @@ async function drawOgpToCanvas(canvas, opts){
     const badgeText=isEn?`Fave: ${m.nameEn||m.name}`:`最推し ${m.name}`;
     const badgeY=fanY+34+wrapExtra;
     ctx.font=isEn?`800 19px ${fontEn}`:`800 20px ${fontJa}`;
-    const padX=16, tw=ctx.measureText(badgeText).width, bw=tw+padX*2, bh=30;
+    const padX=16, tw=ctx.measureText(badgeText).width, bw=tw+padX*2, bh=30; // measureText for accurate badge width (heuristic fallback not needed on canvas)
     const bx=textX, by=badgeY-20;
     ctx.fillStyle=color; roundRect(ctx,bx,by,bw,bh,15); ctx.fill();
     ctx.fillStyle="#fff"; ctx.fillText(badgeText, bx+padX, by+20);

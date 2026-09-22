@@ -49,13 +49,15 @@ try {
   console.warn("data.js load failed", e.message);
 }
 
+// FANMARK: サーバー側では絵文字フォントを持たないため tofu (□や16進表記) 化を避けるため空白にしている。
+// クライアント linker/ogp.js では実際の絵文字を表示するが、サーバーSVGでは Noto/M PLUS しか無いため非表示。
+// 必要ならテキスト代替やSVGアイコンに置換可能。現状は fanName/oshiMark で十分な識別性があるため空白を維持。
 const FANMARK_EMOJI = {
   konomi:"", nono:"", akubi:"", koma:"", raco:"", yura:"",
   nuhu:"", tsukuri:"", liz:"", rei:"", mahoro:"", aoi:"",
   nova:"", uni:"", sona:""
 };
-// 元の絵文字はブラウザのカラー絵文字フォントが必要で、サーバーの Noto/M PLUS では豆腐化して
-// "01F/319" のように16進に化けるため、サーバー側では非表示にする。必要ならテキスト代替にできる。
+// NOTE: 上記は意図的に空白。linker/ogp.js の FANMARK_EMOJI とは表示が異なるが、サーバーでの豆腐化を防ぐための設計差異。
 const GROUP_MEMBERS = {
   nova: ["raco","yura","nuhu","aoi"],
   uni: ["tsukuri","liz","rei"],
@@ -64,10 +66,6 @@ const GROUP_MEMBERS = {
 function getMemberById(id){
   const m = MEMBERS.find(x=>x.id===id) || null;
   if(m) return m;
-  try{
-    const vm = require("vm");
-    // fallback already in MEMBERS
-  }catch(e){}
   return null;
 }
 function getUniformLogoScale(w,h,maxW,maxH,targetDiag){
@@ -82,16 +80,99 @@ function escXml(s) {
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;")
     .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
+// --- SSRF / Private IP helpers ---
+function isPrivateHost(host){
+  const h = String(host).split(":")[0].toLowerCase();
+  if(h==="localhost"||h==="127.0.0.1"||h==="::1"||h==="[::1]"||h==="0.0.0.0") return true;
+  if(/^10\./.test(h)) return true;
+  if(/^172\.(1[6-9]|2\d|3[0-1])\./.test(h)) return true;
+  if(/^192\.168\./.test(h)) return true;
+  if(/^169\.254\./.test(h)) return true;
+  if(/^127\./.test(h)) return true;
+  // IPv6 link-local / loopback etc
+  if(h.startsWith("fc")||h.startsWith("fd")) return true; // unique local
+  if(h==="::ffff:127.0.0.1") return true;
+  return false;
+}
+function isAllowedFetchUrl(urlStr){
+  try{
+    const u = new URL(urlStr);
+    if(u.protocol!=="https:") return false;
+    if(isPrivateHost(u.hostname)) return false;
+    // Optional allowlist for icon sources (public CDN only). Allow any public https by default,
+    // but you can restrict to known hosts:
+    // const allowedHosts = ["res.cloudinary.com","pbs.twimg.com","api.qrserver.com"];
+    // const allowedSuffixes = [".googleusercontent.com",".cloudinary.com"];
+    // const host = u.hostname.toLowerCase();
+    // const ok = allowedHosts.includes(host) || allowedSuffixes.some(sfx=>host.endsWith(sfx));
+    // if(!ok) return false;
+    return true;
+  }catch(e){ return false; }
+}
+// --- Text measurement helpers (server-side heuristic, no canvas) ---
+function estimateTextWidth(text, fontSize){
+  let w=0;
+  const s = String(text);
+  for(const ch of s){
+    const code = ch.charCodeAt(0);
+    if(code < 128){
+      w += fontSize * 0.56;
+    } else if(code >= 0x3000){
+      w += fontSize * 0.95;
+    } else {
+      w += fontSize * 0.62;
+    }
+  }
+  return w;
+}
+function fitNameToWidth(text, maxWidth, initialSize){
+  let size = initialSize;
+  let display = String(text);
+  let w = estimateTextWidth(display, size);
+  while(w > maxWidth && size > 36){
+    size -= 4;
+    w = estimateTextWidth(display, size);
+  }
+  if(w <= maxWidth) return {text: display, size};
+  const ellipsis="...";
+  const ellW = estimateTextWidth(ellipsis, size);
+  while(display.length > 1 && estimateTextWidth(display, size) + ellW > maxWidth){
+    display = display.slice(0, -1);
+  }
+  return {text: display + ellipsis, size};
+}
+
 async function fetchJson(url, ms) {
   const ctl = new AbortController();
   const t = setTimeout(() => ctl.abort(), ms || 8000);
   try {
     const r = await fetch(url, { signal: ctl.signal });
-    if (!r.ok) return null;
+    if (!r.ok) {
+      if(r.status===404) return null; // not found -> caller will 404
+      const err = new Error(`fetchJson failed ${r.status} for ${url}`);
+      err.status = r.status;
+      throw err;
+    }
     return await r.json();
-  } catch (e) { return null; } finally { clearTimeout(t); }
+  } catch (e) {
+    if(e && e.name==="AbortError"){
+      const err = new Error(`fetchJson timeout for ${url}`);
+      err.status = 504;
+      err.cause = e;
+      throw err;
+    }
+    if(e && typeof e.status==="number") throw e;
+    const err2 = new Error(`fetchJson network error for ${url}: ${e && e.message}`);
+    err2.status = 502;
+    err2.cause = e;
+    throw err2;
+  } finally { clearTimeout(t); }
 }
 async function fetchBuffer(url, ms) {
+  if(!url || typeof url!=="string") return null;
+  // data: URLs are handled separately in renderCardOgp, not here
+  if(url.startsWith("data:")) return null;
+  if(!isAllowedFetchUrl(url)) return null;
   try {
     const ctl = new AbortController();
     const t = setTimeout(() => ctl.abort(), ms || 8000);
@@ -100,6 +181,13 @@ async function fetchBuffer(url, ms) {
       if (!r.ok) return null;
       const ab = await r.arrayBuffer();
       if (!ab || ab.byteLength > 8 * 1024 * 1024) return null;
+      // basic content-type check: must be image/*
+      const ct = r.headers.get("content-type")||"";
+      if(ct && !ct.startsWith("image/") && !ct.startsWith("application/octet-stream")){
+        // allow QR server which returns image/png, but block unexpected types like text/html
+        // be permissive: only block obvious non-images
+        if(ct.startsWith("text/")) return null;
+      }
       return Buffer.from(ab);
     } finally { clearTimeout(t); }
   } catch (e) { return null; }
@@ -128,6 +216,9 @@ async function renderCardOgp(opts){
   const xHandle=opts.xHandle||"", oshiHistory=opts.oshiHistory||"", favCount=opts.favCount||0;
   const oshiMark=opts.oshiMark||"", shoulderTitle=opts.shoulderTitle||"";
   const birthday=opts.birthday||"", birthdayPublic=opts.birthdayPublic||"monthDay";
+  // gallery is passed from client for future use but currently not rendered in server OGP (uses talent watermark instead)
+  // kept for API compatibility; document unused
+  const _gallery = Array.isArray(opts.gallery)?opts.gallery.slice(0,3):[];
   const m = MEMBERS.find(x=>x.id===ultimate) || null;
   const color = m ? m.color : "#7f7efd";
   const subColor = m ? (m.subColor || color+"22") : "#e5e3f2";
@@ -139,7 +230,7 @@ async function renderCardOgp(opts){
   let talentBufs=[]; // for watermark
   let groupIds = GROUP_MEMBERS[ultimate] || null;
 
-  // icon
+  // icon — SSRF protected: only https and non-private hosts, or data:image/
   if(icon && icon.startsWith("data:image/")){
     try{
       const b64=icon.split(",")[1];
@@ -148,9 +239,11 @@ async function renderCardOgp(opts){
         if(buf.length<=8*1024*1024) iconPng=await sharp(buf).resize(168,168,{fit:"cover"}).png().toBuffer();
       }
     }catch(e){}
-  } else if(icon && /^https?:\/\//.test(icon)){
-    const b=await fetchBuffer(icon);
-    if(b) try{ iconPng=await sharp(b).resize(168,168,{fit:"cover"}).png().toBuffer(); }catch(e){}
+  } else if(icon && icon.startsWith("https://")){
+    if(isAllowedFetchUrl(icon)){
+      const b=await fetchBuffer(icon);
+      if(b) try{ iconPng=await sharp(b).resize(168,168,{fit:"cover"}).png().toBuffer(); }catch(e){}
+    }
   }
 
   // ultimate logo
@@ -159,8 +252,14 @@ async function renderCardOgp(opts){
     if(mm && mm.logo){
       let p = mm.logo;
       if(p.startsWith("http")){
-        const b=await fetchBuffer(p);
-        if(b){ ultimateLogoBuf=b; ultimateLogoMeta=await getImageMeta(b); }
+        if(isAllowedFetchUrl(p)){
+          const b=await fetchBuffer(p);
+          if(b){ ultimateLogoBuf=b; ultimateLogoMeta=await getImageMeta(b); }
+        } else {
+          // fallback to local if allowlist blocked? try local
+          const b=await loadLocalImageBuffer(p);
+          if(b){ ultimateLogoBuf=b; ultimateLogoMeta=await getImageMeta(b); }
+        }
       } else {
         const b=await loadLocalImageBuffer(p);
         if(b){ ultimateLogoBuf=b; ultimateLogoMeta=await getImageMeta(b); }
@@ -173,9 +272,10 @@ async function renderCardOgp(opts){
     if(b){ siteLogoBuf=b; siteLogoMeta=await getImageMeta(b); }
   }catch(e){}
 
-  // QR — generate from uid
+  // QR — generate from uid (qrData is trusted, constructed server-side)
   if(opts.qrData){
     const qrUrl=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(opts.qrData)}`;
+    // qrUrl is allowlisted (api.qrserver.com) and uses https, safe
     const b=await fetchBuffer(qrUrl);
     if(b) qrBuf=b;
   }
@@ -187,7 +287,7 @@ async function renderCardOgp(opts){
       if(!gm || !gm.img) continue;
       let b=null;
       if(gm.img.startsWith("http")){
-        b=await fetchBuffer(gm.img);
+        if(isAllowedFetchUrl(gm.img)) b=await fetchBuffer(gm.img);
       } else {
         b=await loadLocalImageBuffer(gm.img);
       }
@@ -197,8 +297,9 @@ async function renderCardOgp(opts){
     const mm=getMemberById(ultimate);
     if(mm && mm.img){
       let b=null;
-      if(mm.img.startsWith("http")) b=await fetchBuffer(mm.img);
-      else b=await loadLocalImageBuffer(mm.img);
+      if(mm.img.startsWith("http")){
+        if(isAllowedFetchUrl(mm.img)) b=await fetchBuffer(mm.img);
+      } else b=await loadLocalImageBuffer(mm.img);
       if(b) talentBufs.push({id:ultimate, buf:b, meta:await getImageMeta(b)});
     }
   }
@@ -218,8 +319,6 @@ async function renderCardOgp(opts){
   }
 
   // Build base SVG for background + text
-  // We use SVG for text/shapes, then composite raster images via sharp
-  const isEnFont = isEn ? fontEn : fontJa;
   const subParts=[];
   if(xHandle) subParts.push(`@${String(xHandle).replace(/^@/,"")}`);
   if(oshiHistory) subParts.push(oshiHistory);
@@ -232,9 +331,19 @@ async function renderCardOgp(opts){
   let shoulderY = nameY+26;
   let subY = shoulderTitle ? shoulderY+8 : nameY+32;
   // we will compute fanY etc via SVG coordinates directly
-  // For measurement, we use approximate widths via canvas-like estimate? Use fixed for badge
   const badgeText = m ? (isEn?`Fave: ${m.nameEn||m.name}`:`最推し ${m.name}`) : "";
-  const badgeW = badgeText ? [...badgeText].reduce((a,c)=>a+(c.charCodeAt(0)<128?11:20),0)+32 : 0;
+  // Badge width: use estimateTextWidth for accurate sizing (font size 19/18)
+  const badgeFontSize = isEn?18:19;
+  const badgePadX=16;
+  const badgeW = badgeText ? Math.ceil(estimateTextWidth(badgeText, badgeFontSize) + badgePadX*2 + 4) : 0;
+
+  // Name overflow handling: measure available width and shrink/truncate
+  const availableNameW = W - textX - 32 - 8; // right padding, logo is top-right not overlapping but reserve a bit
+  // If ultimate logo is wide, ensure name doesn't collide visually (logo is at y=28, name at y=168, so no direct overlap, but keep margin)
+  const initialNameSize = isEn?68:70;
+  const fittedName = fitNameToWidth(name, availableNameW, initialNameSize);
+  const nameDisplay = fittedName.text;
+  const nameFontSize = fittedName.size;
 
   // Build SVG string
   let svg = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
@@ -257,16 +366,16 @@ async function renderCardOgp(opts){
   svg+=`</g>`;
   svg+=`<path d="M${W*0.62} ${H*0.55} L${W} ${H*0.35} L${W} ${H} L${W*0.72} ${H} Z" fill="${color}" opacity="0.12"/>`;
 
-  // Text: name
-  svg+=`<text x="${textX}" y="${nameY}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="${isEn?68:70}" font-weight="800" fill="#222">${escXml(name)}</text>`;
+  // Text: name (fitted)
+  svg+=`<text x="${textX}" y="${nameY}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="${nameFontSize}" font-weight="800" fill="#222">${escXml(nameDisplay)}</text>`;
   // shoulder — add extra line spacing to avoid overlap with subLine on server fonts
   if(shoulderTitle){
     svg+=`<text x="${textX}" y="${shoulderY}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="22" font-weight="600" fill="#6b6a7a">${escXml(shoulderTitle)}</text>`;
-    shoulderY += 8; // extra padding for server font metrics (was 4)
+    shoulderY += 8; // extra padding for server font metrics
   }
   // sub (x + oshiHistory)
   if(subLine){
-    // move subLine a bit lower when shoulder exists to avoid overlap
+    // move subLine a bit lower when shoulder exists to avoid overlap (verified: +12 avoids tofu overlap)
     const subYAdj = shoulderTitle ? subY+12 : subY;
     svg+=`<text x="${textX}" y="${subYAdj}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="20" font-weight="600" fill="#6b6a7a">${escXml(subLine)}</text>`;
   }
@@ -309,16 +418,18 @@ async function renderCardOgp(opts){
       const padX=16, bw=badgeW, bh=30;
       const bx=textX, by=badgeY-20;
       svg+=`<rect x="${bx}" y="${by}" rx="15" ry="15" width="${bw}" height="${bh}" fill="${escXml(color)}"/>`;
-      svg+=`<text x="${bx+padX}" y="${by+20}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="${isEn?18:19}" font-weight="800" fill="#fff">${escXml(badgeText)}</text>`;
+      svg+=`<text x="${bx+padX}" y="${by+20}" font-family="${escXml(isEn?fontEn:fontJa)}" font-size="${badgeFontSize}" font-weight="800" fill="#fff">${escXml(badgeText)}</text>`;
       if(birthday && birthdayPublic!=="hidden"){
         const mm=birthday.match(/^(\d{4})-(\d{2})-(\d{2})$/);
         if(mm){
           const bdayText = birthdayPublic==="full" ? `${mm[1]}/${mm[2]}/${mm[3]}` : `${mm[2]}/${mm[3]}`;
-          const iconW=14, bPadX=10, bTw=bdayText.length*9, bW=bTw+iconW+6+bPadX*2, bH=26;
+          const bdayFontSize=14;
+          const iconW=14, bPadX=10, bTw=estimateTextWidth(bdayText, bdayFontSize), bW=Math.ceil(bTw+iconW+6+bPadX*2), bH=26;
           const bX=bx+bw+10, bY=by+2;
           svg+=`<rect x="${bX}" y="${bY}" rx="13" ry="13" width="${bW}" height="${bH}" fill="#fff" stroke="${escXml(color)}" stroke-opacity="0.27" stroke-width="1.5"/>`;
-          svg+=`<text x="${bX+bPadX+7}" y="${bY+17}" font-size="11" text-anchor="middle">🎂</text>`;
-          svg+=`<text x="${bX+bPadX+iconW+6}" y="${bY+17}" font-family="${escXml(fontJa)}" font-size="14" font-weight="700" fill="#6b6a7a">${escXml(bdayText)}</text>`;
+          // Vector birthday cake icon instead of emoji (tofu avoidance)
+          svg+=`<g transform="translate(${bX+bPadX+6},${bY+bH/2}) scale(0.85)"><g stroke="#6b6a7a" fill="none" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M -6 -2 L 6 -2 L 6 6 L -6 6 Z"/><path d="M -6 -2 C -6 -6 6 -6 6 -2"/><path d="M -6 2 L 6 2"/><path d="M 0 -6 L 0 -10"/><circle cx="0" cy="-11.5" r="1.4" fill="#6b6a7a" stroke="none"/></g></g>`;
+          svg+=`<text x="${bX+bPadX+iconW+6}" y="${bY+17}" font-family="${escXml(fontJa)}" font-size="${bdayFontSize}" font-weight="700" fill="#6b6a7a">${escXml(bdayText)}</text>`;
         }
       }
     } else if(birthday && birthdayPublic!=="hidden"){
@@ -326,11 +437,12 @@ async function renderCardOgp(opts){
       if(mm){
         const bdayText = birthdayPublic==="full" ? `${mm[1]}/${mm[2]}/${mm[3]}` : `${mm[2]}/${mm[3]}`;
         let badgeY = fy+34 + ((ultimate==="nova"&&favCount>0)?30:0);
-        const iconW=14, bPadX=10, bTw=bdayText.length*9, bW=bTw+iconW+6+bPadX*2, bH=26;
+        const bdayFontSize=14;
+        const iconW=14, bPadX=10, bTw=estimateTextWidth(bdayText, bdayFontSize), bW=Math.ceil(bTw+iconW+6+bPadX*2), bH=26;
         const bX=textX, bY=badgeY-20+2;
         svg+=`<rect x="${bX}" y="${bY}" rx="13" ry="13" width="${bW}" height="${bH}" fill="#fff" stroke="${escXml(color)}" stroke-opacity="0.27" stroke-width="1.5"/>`;
-        svg+=`<text x="${bX+bPadX+7}" y="${bY+17}" font-size="11" text-anchor="middle">🎂</text>`;
-        svg+=`<text x="${bX+bPadX+iconW+6}" y="${bY+17}" font-family="${escXml(fontJa)}" font-size="14" font-weight="700" fill="#6b6a7a">${escXml(bdayText)}</text>`;
+        svg+=`<g transform="translate(${bX+bPadX+6},${bY+bH/2}) scale(0.85)"><g stroke="#6b6a7a" fill="none" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M -6 -2 L 6 -2 L 6 6 L -6 6 Z"/><path d="M -6 -2 C -6 -6 6 -6 6 -2"/><path d="M -6 2 L 6 2"/><path d="M 0 -6 L 0 -10"/><circle cx="0" cy="-11.5" r="1.4" fill="#6b6a7a" stroke="none"/></g></g>`;
+        svg+=`<text x="${bX+bPadX+iconW+6}" y="${bY+17}" font-family="${escXml(fontJa)}" font-size="${bdayFontSize}" font-weight="700" fill="#6b6a7a">${escXml(bdayText)}</text>`;
       }
     }
   }
@@ -403,14 +515,14 @@ async function renderCardOgp(opts){
   } else if(talentBufs.length===1){
     const tb=talentBufs[0];
     const tw=420, th=460, tx=W - tw - 18, ty=H - th - 18;
-    const scale=Math.max(tw/tb.meta.width, th/tb.meta.height);
+    // FIX: use inside (Math.min) to fit within watermark box, not cover (Math.max) which overflows
+    const scale=Math.min(tw/tb.meta.width, th/tb.meta.height);
     const dw=Math.round(tb.meta.width*scale), dh=Math.round(tb.meta.height*scale);
     const dx=Math.round(tx + tw/2 - dw/2);
     const yOff2 = ultimate==="aoi" ? 26 : (ultimate==="tsukuri"||ultimate==="tukuri"?14:0);
     const dy=Math.round(ty + th - dh + yOff2);
     try{
       const resized=await sharp(tb.buf).resize(dw,dh,{fit:"inside"}).png().toBuffer();
-      // need to crop to tw x th? Use resize with cover? For now just composite with offset
       composites.push({input:resized, left:dx, top:dy});
     }catch(e){}
   }
@@ -420,15 +532,12 @@ async function renderCardOgp(opts){
     const circleSvg=Buffer.from('<svg width="168" height="168"><circle cx="84" cy="84" r="84" fill="white"/></svg>');
     const masked=await sharp(iconPng).composite([{input:circleSvg, blend:"dest-in"}]).png().toBuffer();
     composites.push({input:masked, left:iconX, top:iconY});
-    // border circle via SVG overlay? We'll draw border as part of base SVG already has stroke? Base has no icon border; add via SVG rect circle
-    // Instead, we will composite a border ring via SVG
+    // border circle via SVG overlay
     const borderSvg=Buffer.from(`<svg width="168" height="168" xmlns="http://www.w3.org/2000/svg"><circle cx="84" cy="84" r="82" fill="none" stroke="${escXml(color)}" stroke-width="5"/></svg>`);
     composites.push({input:borderSvg, left:iconX, top:iconY});
   } else {
-    // fallback initials already in SVG? We didn't add; but icon circle is via SVG background? Actually base SVG doesn't have icon circle; we need to add it
-    // For no icon, base SVG should have circle placeholder, we will add via composite of text?
-    // Simpler: add a circle with initials via SVG overlay
-    const initials = escXml((name||"?").slice(0,2));
+    // fallback initials already in SVG? add circle with initials via composite
+    const initials = escXml((nameDisplay||name||"?").slice(0,2));
     const initSvg = `<svg width="168" height="168" xmlns="http://www.w3.org/2000/svg"><circle cx="84" cy="84" r="84" fill="#f7f5ff" stroke="${escXml(color)}" stroke-width="5"/><text x="84" y="96" font-family="${escXml(fontJa)}" font-size="50" font-weight="700" fill="${escXml(color)}" text-anchor="middle">${initials}</text></svg>`;
     composites.push({input:Buffer.from(initSvg), left:iconX, top:iconY});
   }
@@ -480,7 +589,15 @@ app.get("/cardOgp", async (req,res)=>{
     }
     const uid=String(req.query.uid||"");
     if(!/^[A-Za-z0-9_-]{1,128}$/.test(uid)) return res.status(400).send("uid required");
-    const data=await fetchJson(`${DB_BASE}/millipro/linker/${encodeURIComponent(uid)}.json`);
+    let data=null;
+    try{
+      data=await fetchJson(`${DB_BASE}/millipro/linker/${encodeURIComponent(uid)}.json`);
+    }catch(e){
+      if(e && e.status===504) return res.status(504).send("upstream timeout");
+      if(e && e.status===502) return res.status(502).send("upstream error");
+      if(e && e.status) return res.status(e.status).send("fetch failed");
+      throw e;
+    }
     if(!data) return res.status(404).send("not found");
     // extract fields
     const favCount = Array.isArray(data.favs)? data.favs.length : 0;
@@ -508,16 +625,19 @@ app.get("/cardOgp", async (req,res)=>{
       name:data.name, icon:data.icon, ultimate:data.ultimate, oshiMark:data.oshiMark||"",
       shoulderTitle:data.title||"", xHandle, oshiHistory:data.oshiHistory||"",
       favCount, birthday:data.birthday||"", birthdayPublic:data.birthdayPublic||"monthDay",
-      lang, qrData:`https://milli-kit.pages.dev/linker/view.html?uid=${encodeURIComponent(uid)}`
+      lang, qrData:`https://milli-kit.pages.dev/linker/view.html?uid=${encodeURIComponent(uid)}`,
+      gallery: Array.isArray(data.gallery)?data.gallery.slice(0,3):[]
     });
     res.set("Content-Type","image/png");
-    res.set("Cache-Control","public, max-age=300, s-maxage=600");
+    // caching: public 5min, CDN 10min, with stale-while-revalidate for OGP
+    res.set("Cache-Control","public, max-age=300, s-maxage=600, stale-while-revalidate=60");
     res.send(buf);
   }catch(e){
     console.error("cardOgp failed", e);
+    // differentiate upstream errors already handled above; default 500
+    if(e && e.status && e.status>=400 && e.status<600) return res.status(e.status).send(e.message||"error");
     res.status(500).send("render failed");
   }
 });
 app.get("/", (req,res)=>res.send("milli-kit-ogp ok. GET /cardOgp?uid=xx"));
 app.listen(PORT, ()=>console.log(`ogp listening on ${PORT}`));
-

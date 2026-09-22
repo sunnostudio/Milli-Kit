@@ -11,20 +11,26 @@ export async function onRequest(context) {
   if (!isView) return res;
   const ct = res.headers.get("content-type") || "";
   if (!ct.includes("text/html")) return res;
-  const uid = url.searchParams.get("uid") || url.searchParams.get("u") || url.searchParams.get("id") || "";
+  const uidRaw = url.searchParams.get("uid") || url.searchParams.get("u") || url.searchParams.get("id") || "";
+  // Validate uid before interpolating into DB URL — prevent path injection / SSRF
+  const uid = /^[A-Za-z0-9_-]{1,128}$/.test(uidRaw) ? uidRaw : "";
   let html = await res.text();
   if (!uid) return new Response(html, res);
 
   let name = "";
   let ultimateRaw = "";
+  let updatedAt = "";
   try {
-    const dbUrl = `https://millipro-shared-default-rtdb.asia-southeast1.firebasedatabase.app/millipro/linker/${uid}.json`;
+    // use encodeURIComponent to safely interpolate uid into URL
+    const dbUrl = `https://millipro-shared-default-rtdb.asia-southeast1.firebasedatabase.app/millipro/linker/${encodeURIComponent(uid)}.json`;
     const r = await fetch(dbUrl, { cf: { cacheTtl: 60 } });
     if (r.ok) {
       const data = await r.json();
       if (data) {
         name = data.name || "";
         ultimateRaw = data.ultimate || "";
+        // for cache busting: use updatedAt if available
+        updatedAt = data.updatedAt || data.updated_at || "";
       }
     }
   } catch (e) {}
@@ -36,9 +42,20 @@ export async function onRequest(context) {
   };
   const ultimateName = MEMBER_NAMES[ultimateRaw] || ultimateRaw;
 
-  const ogImage = `${OGP_HOST}/cardOgp?uid=${encodeURIComponent(uid)}`;
-  const ogTitle = name ? `${name} — ${ultimateName ? ultimateName : "Milli Linker"} | Milli Kit` : `Milli Linker プロフィール | Milli Kit`;
-  const ogDesc = name ? `${name}の推し活名刺。最推し ${ultimateName || ""}` : `推し・神回を1枚にまとめた名刺です。`;
+  // Cache buster for ogImage: use updatedAt if present, else static version (ensures CDN can cache but busts on update)
+  const vParam = updatedAt ? encodeURIComponent(String(updatedAt)) : "1";
+  const ogImage = `${OGP_HOST}/cardOgp?uid=${encodeURIComponent(uid)}&v=${vParam}`;
+  // Length trim for OGP title/desc to prevent overflow / injection (X/Twitter limits)
+  const MAX_TITLE_LEN = 60;
+  const MAX_DESC_LEN = 120;
+  let ogTitle = name ? `${name} — ${ultimateName ? ultimateName : "Milli Linker"} | Milli Kit` : `Milli Linker プロフィール | Milli Kit`;
+  let ogDesc = name ? `${name}の推し活名刺。最推し ${ultimateName || ""}` : `推し・神回を1枚にまとめた名刺です。`;
+  // trim with ellipsis
+  if(ogTitle.length > MAX_TITLE_LEN) ogTitle = ogTitle.slice(0, MAX_TITLE_LEN-1) + "…";
+  if(ogDesc.length > MAX_DESC_LEN) ogDesc = ogDesc.slice(0, MAX_DESC_LEN-1) + "…";
+  // also ensure no newlines
+  ogTitle = String(ogTitle).replace(/[\r\n]+/g, " ").trim();
+  ogDesc = String(ogDesc).replace(/[\r\n]+/g, " ").trim();
 
   function escAttr(s){ return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
   html = html.replace(
@@ -64,7 +81,8 @@ export async function onRequest(context) {
   return new Response(html, {
     headers: {
       "content-type": "text/html; charset=utf-8",
-      "cache-control": "public, max-age=60",
+      // caching: s-maxage for CDN, max-age for browser
+      "cache-control": "public, max-age=60, s-maxage=120",
     },
   });
 }
