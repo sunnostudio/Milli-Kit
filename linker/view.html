@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <title data-i18n="view.meta.title">Milli Linker — プロフィール</title>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Milli Kit">
@@ -16,10 +16,14 @@
 <link rel="stylesheet" href="../kit.css">
 <link rel="stylesheet" href="linker.css">
 <style>
-.view-wrap{max-width:780px;margin:0 auto;padding:18px;overflow-x:hidden;min-width:0;}
-.view-card{background:#fff;border:1px solid #e5e3f2;border-radius:18px;overflow:hidden;box-shadow:0 4px 16px rgba(127,126,253,.08);max-width:100%;}
+*{box-sizing:border-box;}
+html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+html, body{overflow-x:hidden; overscroll-behavior:contain;}
+.view-wrap{max-width:780px;margin:0 auto;padding:18px;overflow-x:hidden;min-width:0; contain:content;}
+.view-card{background:#fff;border:1px solid #e5e3f2;border-radius:18px;overflow:hidden;box-shadow:0 4px 16px rgba(127,126,253,.08);max-width:100%; contain:layout;}
 html, body{overflow-x:hidden;}
-img{max-width:100%;}
+img, picture, video{max-width:100%; height:auto; display:block;}
+.view-wrap img{max-width:100%;}
 .view-hero{position:relative;overflow:hidden;background:var(--view-hero-grad, linear-gradient(135deg, var(--view-accent,#7f7efd) 0%, #fff 100%));}
 .view-hero-bg{position:absolute;right:0;top:0;bottom:0;width:46%;opacity:0.18;overflow:hidden;}
 .view-hero-bg img{width:100%;height:100%;object-fit:cover;object-position:center top;}
@@ -48,18 +52,18 @@ img{max-width:100%;}
 .view-oshi-grid{display:grid;grid-template-columns:80px 1fr;gap:12px;align-items:center;}
 .view-oshi-img{width:80px;height:80px;border-radius:14px;overflow:hidden;border:1px solid #e5e3f2;background:#f7f5ff;}
 .view-oshi-img img{width:100%;height:100%;object-fit:cover;}
-.view-media{display:grid;grid-template-columns:repeat(auto-fill, minmax(180px,1fr));gap:14px;min-width:0;}
-.view-media-item{background:rgba(255,255,255,0.94);border:3px solid #fff;outline:2px solid rgba(0,0,0,.12);border-radius:16px;overflow:hidden;box-shadow:0 6px 0 rgba(90,75,55,.06), 0 10px 24px rgba(90,75,55,.10);display:flex;flex-direction:column;transition:.14s;min-width:0;max-width:100%;}
-.view-media-item .goods-tile{position:relative;display:flex;align-items:center;justify-content:center;aspect-ratio:16/9;border-radius:12px;border:3px solid #fff;outline:2px solid rgba(0,0,0,.06);background:linear-gradient(160deg, color-mix(in srgb, var(--view-accent) 24%, #fff), color-mix(in srgb, var(--view-accent) 9%, #fff));overflow:hidden;margin:4px 4px 0;min-width:0;}
+.view-media{display:grid;grid-template-columns:repeat(auto-fill, minmax(180px,1fr));gap:14px;min-width:0; contain:layout;}
+.view-media-item{background:rgba(255,255,255,0.94);border:3px solid #fff;outline:2px solid rgba(0,0,0,.12);border-radius:16px;overflow:hidden;box-shadow:0 6px 0 rgba(90,75,55,.06), 0 10px 24px rgba(90,75,55,.10);display:flex;flex-direction:column;transition:.14s;min-width:0;max-width:100%; contain:layout;}
+.view-media-item .goods-tile{position:relative;display:flex;align-items:center;justify-content:center;aspect-ratio:16/9;border-radius:12px;border:3px solid #fff;outline:2px solid rgba(0,0,0,.06);background:linear-gradient(160deg, color-mix(in srgb, var(--view-accent) 24%, #fff), color-mix(in srgb, var(--view-accent) 9%, #fff));overflow:hidden;margin:4px 4px 0;min-width:0; contain:layout;}
 .view-media-item .goods-tile img{width:100%;height:100%;max-width:100%;min-width:0;object-fit:cover;display:block;border-radius:inherit;}
 .view-media-meta{padding:10px 12px;flex:1;display:flex;flex-direction:column;gap:4px;font-size:12px;}
 a:hover .view-media-item{border-color:#fff;outline-color:var(--view-accent);transform:translateY(-2px);box-shadow:0 8px 0 rgba(90,75,55,.06), 0 14px 28px rgba(90,75,55,.14);}
 @media(max-width:640px){
   .view-media{grid-template-columns:repeat(2,1fr);gap:10px;}
 }
-.view-gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;min-width:0;}
+.view-gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;min-width:0; contain:layout;}
 @media(min-width:560px){ .view-gallery{grid-template-columns:repeat(3,1fr);} }
-.view-gallery-item{border:1px solid #e5e3f2;border-radius:12px;overflow:hidden;background:#fff;min-width:0;max-width:100%;}
+.view-gallery-item{border:1px solid #e5e3f2;border-radius:12px;overflow:hidden;background:#fff;min-width:0;max-width:100%; contain:layout;}
 .view-gallery-item img{width:100%;max-width:100%;min-width:0;aspect-ratio:4/3;object-fit:cover;display:block;}
 .view-gallery-cap{padding:6px 8px;font-size:11px;white-space:pre-wrap;}
 .view-free{padding:12px;border:1px dashed #e5e3f2;border-radius:12px;background:#fff;white-space:pre-wrap;font-size:13px;}
